@@ -10,6 +10,8 @@ import {
   findMinimumEarthquakes,
   getTargetBuildingFromData,
 } from "@/src/lib/game";
+import { useUserProgress } from "@/src/lib/game/use-user-progress";
+import { Badge } from "@/src/components/ui/Badge";
 import type {
   BuildingTarget,
   EquipmentDamageSource,
@@ -20,6 +22,7 @@ import type {
   EquipmentDefinition,
   SpellDefinition,
 } from "@/src/types/game/game-data";
+import type { UserProgress } from "@/src/types/game/user-progress";
 
 import { CalculatorResult } from "./CalculatorResult";
 import {
@@ -41,15 +44,24 @@ const earthquakeSpell = spellDefinitions.find(
   (spell) => spell.id === "earthquake-spell",
 );
 
-function buildInitialEquipmentSelections() {
+function buildInitialEquipmentSelections(savedProgress?: UserProgress) {
   return Object.fromEntries(
-    equipmentDefinitions.map((item) => [
-      item.id,
-      {
-        enabled: item.levels.length > 0,
-        level: item.levels.at(-1)?.level,
-      },
-    ]),
+    equipmentDefinitions.map((item) => {
+      const savedLevel = savedProgress?.equipmentLevels[item.id];
+      const selectedLevel = item.levels.some(
+        (level) => level.level === savedLevel,
+      )
+        ? savedLevel
+        : item.levels.at(-1)?.level;
+
+      return [
+        item.id,
+        {
+          enabled: item.levels.length > 0,
+          level: selectedLevel,
+        },
+      ];
+    }),
   );
 }
 
@@ -82,6 +94,26 @@ function isSpellSource(
 }
 
 export function CalculatorForm() {
+  const { savedProgress, hasSavedProgress } = useUserProgress();
+
+  return (
+    <CalculatorEditor
+      key={savedProgress?.updatedAt ?? "default-calculator"}
+      savedProgress={savedProgress}
+      hasSavedProgress={hasSavedProgress}
+    />
+  );
+}
+
+type CalculatorEditorProps = {
+  savedProgress: UserProgress | undefined;
+  hasSavedProgress: boolean;
+};
+
+function CalculatorEditor({
+  savedProgress,
+  hasSavedProgress,
+}: CalculatorEditorProps) {
   const [selectedTownHallLevel, setSelectedTownHallLevel] = useState(
     defaultBuildingLevel?.townHallLevel ?? 18,
   );
@@ -96,10 +128,17 @@ export function CalculatorForm() {
   >(undefined);
   const [equipmentSelections, setEquipmentSelections] = useState<
     Record<string, EquipmentSelection>
-  >(buildInitialEquipmentSelections);
+  >(() => buildInitialEquipmentSelections(savedProgress));
+  const savedEarthquakeLevel =
+    savedProgress?.spellLevels["earthquake-spell"];
+  const defaultEarthquakeLevel = earthquakeSpell?.levels.some(
+    (level) => level.level === savedEarthquakeLevel,
+  )
+    ? savedEarthquakeLevel
+    : earthquakeSpell?.levels.at(-1)?.level;
   const [earthquakeSelection, setEarthquakeSelection] = useState<SpellSelection>({
     enabled: Boolean(earthquakeSpell?.levels.length),
-    level: earthquakeSpell?.levels.at(-1)?.level,
+    level: defaultEarthquakeLevel,
     count: 3,
   });
 
@@ -229,82 +268,98 @@ export function CalculatorForm() {
   );
 
   return (
-    <div className="mt-12 grid gap-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
-      <Card className="p-5 sm:p-7">
-        <div className="space-y-8">
-          <TargetBuildingSelector
-            buildings={buildingDefinitions}
-            selectedTownHallLevel={selectedTownHallLevel}
-            selectedBuildingId={selectedBuildingId}
-            selectedBuildingLevel={effectiveBuildingLevel}
-            selectedSuperchargeLevel={effectiveSuperchargeLevel}
-            availableLevels={availableLevels}
-            onTownHallChange={(townHallLevel) => {
-              setSelectedTownHallLevel(townHallLevel);
-              setSelectedBuildingLevel(undefined);
-              setSelectedSuperchargeLevel(undefined);
-            }}
-            onBuildingChange={(buildingId) => {
-              setSelectedBuildingId(buildingId);
-              setSelectedBuildingLevel(undefined);
-              setSelectedSuperchargeLevel(undefined);
-            }}
-            onBuildingLevelChange={setSelectedBuildingLevel}
-            onSuperchargeLevelChange={setSelectedSuperchargeLevel}
-          />
-
-          <EquipmentSelector
-            equipmentItems={equipmentDefinitions}
-            selections={equipmentSelections}
-            onToggle={(equipmentId, enabled) =>
-              setEquipmentSelections((current) => ({
-                ...current,
-                [equipmentId]: {
-                  ...current[equipmentId],
-                  enabled,
-                  level:
-                    current[equipmentId]?.level ??
-                    equipmentDefinitions
-                      .find((item) => item.id === equipmentId)
-                      ?.levels.at(-1)?.level,
-                },
-              }))
-            }
-            onLevelChange={(equipmentId, level) =>
-              setEquipmentSelections((current) => ({
-                ...current,
-                [equipmentId]: {
-                  enabled: current[equipmentId]?.enabled ?? true,
-                  level,
-                },
-              }))
-            }
-          />
-
-          <SpellSelector
-            spell={earthquakeSpell}
-            selection={earthquakeSelection}
-            onToggle={(enabled) =>
-              setEarthquakeSelection((current) => ({ ...current, enabled }))
-            }
-            onLevelChange={(level) =>
-              setEarthquakeSelection((current) => ({ ...current, level }))
-            }
-            onCountChange={(count) =>
-              setEarthquakeSelection((current) => ({ ...current, count }))
-            }
-          />
+    <div className="mt-12">
+      {hasSavedProgress && (
+        <div className="mb-4 flex flex-col gap-2 rounded-xl border border-sky-300/15 bg-sky-300/[0.06] p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <Badge tone="info">Using saved progress</Badge>
+            <p className="mt-2 text-sm text-slate-400">
+              Equipment and spell levels started from your locally saved profile.
+            </p>
+          </div>
+          <p className="text-xs font-bold text-slate-500">
+            Calculator changes are not saved automatically.
+          </p>
         </div>
-      </Card>
+      )}
 
-      <Card className="p-5 sm:p-7">
-        <CalculatorResult
-          target={target}
-          result={result}
-          minimumEarthquakes={minimumEarthquakes}
-          missingReason={missingReason}
-        />
-      </Card>
+      <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
+        <Card className="p-5 sm:p-7">
+          <div className="space-y-8">
+            <TargetBuildingSelector
+              buildings={buildingDefinitions}
+              selectedTownHallLevel={selectedTownHallLevel}
+              selectedBuildingId={selectedBuildingId}
+              selectedBuildingLevel={effectiveBuildingLevel}
+              selectedSuperchargeLevel={effectiveSuperchargeLevel}
+              availableLevels={availableLevels}
+              onTownHallChange={(townHallLevel) => {
+                setSelectedTownHallLevel(townHallLevel);
+                setSelectedBuildingLevel(undefined);
+                setSelectedSuperchargeLevel(undefined);
+              }}
+              onBuildingChange={(buildingId) => {
+                setSelectedBuildingId(buildingId);
+                setSelectedBuildingLevel(undefined);
+                setSelectedSuperchargeLevel(undefined);
+              }}
+              onBuildingLevelChange={setSelectedBuildingLevel}
+              onSuperchargeLevelChange={setSelectedSuperchargeLevel}
+            />
+
+            <EquipmentSelector
+              equipmentItems={equipmentDefinitions}
+              selections={equipmentSelections}
+              onToggle={(equipmentId, enabled) =>
+                setEquipmentSelections((current) => ({
+                  ...current,
+                  [equipmentId]: {
+                    ...current[equipmentId],
+                    enabled,
+                    level:
+                      current[equipmentId]?.level ??
+                      equipmentDefinitions
+                        .find((item) => item.id === equipmentId)
+                        ?.levels.at(-1)?.level,
+                  },
+                }))
+              }
+              onLevelChange={(equipmentId, level) =>
+                setEquipmentSelections((current) => ({
+                  ...current,
+                  [equipmentId]: {
+                    enabled: current[equipmentId]?.enabled ?? true,
+                    level,
+                  },
+                }))
+              }
+            />
+
+            <SpellSelector
+              spell={earthquakeSpell}
+              selection={earthquakeSelection}
+              onToggle={(enabled) =>
+                setEarthquakeSelection((current) => ({ ...current, enabled }))
+              }
+              onLevelChange={(level) =>
+                setEarthquakeSelection((current) => ({ ...current, level }))
+              }
+              onCountChange={(count) =>
+                setEarthquakeSelection((current) => ({ ...current, count }))
+              }
+            />
+          </div>
+        </Card>
+
+        <Card className="p-5 sm:p-7">
+          <CalculatorResult
+            target={target}
+            result={result}
+            minimumEarthquakes={minimumEarthquakes}
+            missingReason={missingReason}
+          />
+        </Card>
+      </div>
     </div>
   );
 }

@@ -8,4 +8,12 @@ export {
   findMinimumEquipmentLevel,
   getTargetBuildingFromData,
 } from "./damage-calculator";
-
+export {
+  clearUserProgress,
+  getDefaultUserProgress,
+  getUserProgress,
+  hasUserProgress,
+  parseUserProgress,
+  saveUserProgress,
+  validateUserProgress,
+} from "./user-progress";
