@@ -56,7 +56,7 @@ export function SiteHeader() {
         <div className="hidden items-center gap-2 lg:flex">
           <span className="size-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.8)]" />
           <span className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
-            Phase 6
+            Phase 7
           </span>
         </div>
 

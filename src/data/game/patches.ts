@@ -16,6 +16,16 @@ export const patches = [
     notes:
       "Giant Arrow balance change, equipment and defense balance changes.",
     isCurrent: true,
+    verificationStatus: "partial",
+    verifiedAt: "2026-06-09",
+    changedItems: [
+      {
+        type: "equipment",
+        itemId: "giant-arrow",
+        itemName: "Giant Arrow",
+        summary:
+          "Damage updated and the 2x damage rule against Air Defense was added.",
+      },
+    ],
   },
 ] as const satisfies readonly PatchInfo[];
-

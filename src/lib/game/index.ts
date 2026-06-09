@@ -22,3 +22,11 @@ export {
   parseVillageSnapshot,
   parseVillageSnapshotJson,
 } from "./json-importer";
+export {
+  auditGameData,
+  createBuildingAuditRows,
+  createEquipmentAuditRows,
+  createSpellAuditRows,
+  getLatestPatchId,
+  getMissingSourceCount,
+} from "./data-audit";

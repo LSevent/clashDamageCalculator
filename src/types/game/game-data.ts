@@ -1,12 +1,24 @@
 export type Village = "home" | "builder";
 
+export type PatchVerificationStatus = "verified" | "partial" | "needs-review";
+
+export type PatchChangedItem = {
+  type: "building" | "equipment" | "spell" | "other";
+  itemId: string;
+  itemName: string;
+  summary: string;
+};
+
 export type PatchInfo = {
   id: string;
   name: string;
   releaseDate: string;
-  sourceUrl: string;
+  sourceUrl?: string;
   notes: string;
   isCurrent: boolean;
+  changedItems?: readonly PatchChangedItem[];
+  verifiedAt?: string;
+  verificationStatus: PatchVerificationStatus;
 };
 
 export type BuildingCategory =
@@ -102,4 +114,3 @@ export type ObjectIdMap = {
   units: Readonly<Record<number, string>>;
   traps: Readonly<Record<number, string>>;
 };
-
