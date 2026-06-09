@@ -274,7 +274,10 @@ function CalculatorEditor({
           <div>
             <Badge tone="info">Using saved progress</Badge>
             <p className="mt-2 text-sm text-slate-400">
-              Equipment and spell levels started from your locally saved profile.
+              Equipment and spell levels started from your locally saved profile
+              ({savedProgress?.source === "json-import"
+                ? "JSON import"
+                : "manual"}).
             </p>
           </div>
           <p className="text-xs font-bold text-slate-500">

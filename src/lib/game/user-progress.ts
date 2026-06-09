@@ -133,8 +133,8 @@ export function validateUserProgress(
     errors.spellLevels = spellResult.errors;
   }
 
-  if (value.source !== "manual") {
-    errors.source = "Progress source must be manual.";
+  if (value.source !== "manual" && value.source !== "json-import") {
+    errors.source = "Progress source must be manual or JSON import.";
   }
 
   if (
@@ -160,7 +160,7 @@ export function validateUserProgress(
       equipmentLevels: equipmentResult.normalized,
       spellLevels: spellResult.normalized,
       updatedAt: value.updatedAt as string,
-      source: "manual",
+      source: value.source as UserProgress["source"],
     },
   };
 }

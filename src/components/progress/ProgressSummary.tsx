@@ -44,7 +44,9 @@ export function ProgressSummary({ progress }: ProgressSummaryProps) {
             <p className="mt-1 text-sm text-slate-500">{progress.playerTag}</p>
           )}
         </div>
-        <Badge tone="info">Source: Manual</Badge>
+        <Badge tone="info">
+          Source: {progress.source === "json-import" ? "JSON import" : "Manual"}
+        </Badge>
       </div>
 
       <dl className="mt-5 divide-y divide-white/8">
@@ -87,4 +89,3 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
-

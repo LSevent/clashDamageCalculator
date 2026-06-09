@@ -17,6 +17,7 @@ import type {
 } from "@/src/types/game/user-progress";
 
 import { EquipmentProgressForm } from "./EquipmentProgressForm";
+import { JsonImportPanel } from "./JsonImportPanel";
 import { ProgressSummary } from "./ProgressSummary";
 import { SpellProgressForm } from "./SpellProgressForm";
 
@@ -36,6 +37,7 @@ type ProgressEditorProps = {
     message: string,
     tone?: "success" | "error",
   ) => void;
+  onSaveImportedProgress: (progress: UserProgress) => boolean;
 };
 
 export function ProgressSetupForm() {
@@ -78,6 +80,16 @@ export function ProgressSetupForm() {
       statusMessage={statusMessage}
       statusTone={statusTone}
       onStatusChange={handleStatusChange}
+      onSaveImportedProgress={(nextProgress) => {
+        const saved = saveProgress(nextProgress);
+        handleStatusChange(
+          saved
+            ? "Imported progress saved locally on this device."
+            : "Imported progress could not be saved. Browser storage may be unavailable.",
+          saved ? "success" : "error",
+        );
+        return saved;
+      }}
     />
   );
 }
@@ -90,6 +102,7 @@ function ProgressEditor({
   statusMessage,
   statusTone,
   onStatusChange,
+  onSaveImportedProgress,
 }: ProgressEditorProps) {
   const [draft, setDraft] = useState<UserProgress>(initialProgress);
   const [errors, setErrors] = useState<UserProgressValidationErrors>({});
@@ -289,31 +302,10 @@ function ProgressEditor({
         </Card>
       </div>
 
-      <Card className="mt-5 p-5 sm:p-7">
-        <div className="grid gap-5 sm:grid-cols-2">
-          <div>
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-emerald-400">
-              Available now
-            </p>
-            <h2 className="mt-2 font-black text-white">Manual setup</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
-              Enter your levels directly and keep them locally on this device.
-            </p>
-          </div>
-          <div>
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-slate-500">
-              Coming later
-            </p>
-            <h2 className="mt-2 font-black text-white">
-              Optional JSON import preview
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
-              JSON import will be optional. If you do not want to import data,
-              you can always enter levels manually.
-            </p>
-          </div>
-        </div>
-      </Card>
+      <JsonImportPanel
+        baseProgress={initialProgress}
+        onSaveImportedProgress={onSaveImportedProgress}
+      />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-export type UserProgressSource = "manual";
+export type UserProgressSource = "manual" | "json-import";
 
 export type UserProgress = {
   playerTag?: string;
@@ -29,4 +29,3 @@ export type UserProgressValidationResult =
       valid: false;
       errors: UserProgressValidationErrors;
     };
-
