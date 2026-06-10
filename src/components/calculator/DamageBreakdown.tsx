@@ -1,4 +1,5 @@
 import type { DamageBreakdownItem } from "@/src/types/game/calculator";
+import { formatNumber } from "@/src/lib/format-number";
 
 type DamageBreakdownProps = {
   breakdown: readonly DamageBreakdownItem[];
@@ -35,24 +36,29 @@ export function DamageBreakdown({ breakdown }: DamageBreakdownProps) {
                 {item.count !== undefined ? ` x ${item.count}` : ""}
               </p>
               <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-500">
+                {item.count !== undefined && <span>Count: {item.count}</span>}
                 {item.baseDamage !== undefined && (
-                  <span>Base: {item.baseDamage}</span>
+                  <span>Base damage: {formatNumber(item.baseDamage)}</span>
                 )}
                 {item.damagePercent !== undefined && (
-                  <span>Percent: {formatPercent(item.damagePercent)}</span>
+                  <span>
+                    Damage per first spell: {formatPercent(item.damagePercent)}
+                  </span>
                 )}
                 {item.effectivePercent !== undefined && (
-                  <span>Effective: {formatPercent(item.effectivePercent)}</span>
+                  <span>
+                    Combined percentage: {formatPercent(item.effectivePercent)}
+                  </span>
                 )}
               </div>
             </div>
             <div className="rounded-lg border border-white/8 bg-white/5 px-3 py-2 text-sm font-black text-white">
-              {item.finalDamage} damage
+              {formatNumber(item.finalDamage)} final damage
             </div>
           </div>
 
           {item.notes.length > 0 && (
-            <ul className="mt-3 space-y-1 text-xs leading-5 text-amber-200">
+            <ul className="mt-3 list-disc space-y-1 pl-4 text-xs leading-5 text-amber-200">
               {item.notes.map((note) => (
                 <li key={note}>{note}</li>
               ))}
@@ -63,4 +69,3 @@ export function DamageBreakdown({ breakdown }: DamageBreakdownProps) {
     </div>
   );
 }
-

@@ -1,11 +1,10 @@
 import { Card } from "@/src/components/ui/Card";
 
 const limitations = [
-  "Static data is partial and will be expanded as values are verified.",
-  "Some stats may need manual review after each Clash of Clans patch.",
+  "Calculator results depend on the accuracy of local static data. Some newly changed Clash of Clans stats may be marked partial or needs-review until manually verified.",
+  "Static data is intentionally limited to values that can be represented without guessing.",
   "The app does not automatically extract data from Clash of Clans.",
   "JSON import is optional and only reads data that a user provides.",
-  "Damage results depend on the accuracy of the local stat data.",
 ];
 
 export function DataLimitations() {
@@ -15,7 +14,7 @@ export function DataLimitations() {
         Known limitations
       </p>
       <h2 className="mt-2 text-2xl font-black text-white">
-        What this dashboard does not guarantee
+        Data notes
       </h2>
       <ul className="mt-5 grid gap-3 text-sm leading-6 text-slate-400 sm:grid-cols-2">
         {limitations.map((limitation) => (

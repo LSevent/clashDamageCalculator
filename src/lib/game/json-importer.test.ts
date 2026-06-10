@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   importedPreviewToUserProgress,
+  MAX_JSON_IMPORT_LENGTH,
   parseVillageSnapshotJson,
 } from "./json-importer";
 import { getDefaultUserProgress } from "./user-progress";
@@ -42,6 +43,24 @@ describe("JSON importer", () => {
       success: false,
       error: "Invalid JSON syntax. Check the pasted text and try again.",
     });
+  });
+
+  it("returns a clear error for empty input", () => {
+    expect(parseVillageSnapshotJson("   ")).toEqual({
+      success: false,
+      error: "Paste village snapshot JSON before previewing the import.",
+    });
+  });
+
+  it("rejects oversized JSON before parsing", () => {
+    const result = parseVillageSnapshotJson(
+      `{"padding":"${"x".repeat(MAX_JSON_IMPORT_LENGTH)}"}`,
+    );
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toContain("JSON is too large");
+    }
   });
 
   it("ignores and counts unknown IDs", () => {
@@ -111,7 +130,7 @@ describe("JSON importer", () => {
       JSON.stringify({
         buildings: validSnapshot.buildings,
         equipment: [
-          { data: 90000024, lvl: 18 },
+          { data: 90000024, lvl: 12 },
           { data: 90000024, lvl: 18 },
         ],
       }),
@@ -155,6 +174,7 @@ describe("JSON importer", () => {
         },
         source: "json-import",
       });
+      expect(progress).not.toHaveProperty("rawJson");
     }
   });
 });

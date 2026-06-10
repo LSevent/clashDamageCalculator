@@ -51,17 +51,21 @@ function getAvailableLevels(
 ): readonly number[] {
   if (section === "equipment") {
     return (
-      equipment.find((item) => item.id === appObjectId)?.levels.map(
-        (level) => level.level,
-      ) ?? []
+      equipment
+        .find(
+          (item) => item.id === appObjectId && item.calculatorEnabled,
+        )
+        ?.levels.map((level) => level.level) ?? []
     );
   }
 
   if (section === "spells") {
     return (
-      spells.find((spell) => spell.id === appObjectId)?.levels.map(
-        (level) => level.level,
-      ) ?? []
+      spells
+        .find(
+          (spell) => spell.id === appObjectId && spell.calculatorEnabled,
+        )
+        ?.levels.map((level) => level.level) ?? []
     );
   }
 

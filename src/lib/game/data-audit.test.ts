@@ -39,6 +39,10 @@ describe("data audit", () => {
     ]);
     expect(audit.currentPatch?.id).toBe("june-2026-anime-fury");
     expect(audit.currentPatch?.id).toBe(CURRENT_PATCH_ID);
+    expect(audit.currentPatch?.verificationStatus).toBe("partial");
+    expect(
+      patches.every((patch) => patch.verificationStatus === "partial"),
+    ).toBe(true);
   });
 
   it("counts missing source URLs safely", () => {

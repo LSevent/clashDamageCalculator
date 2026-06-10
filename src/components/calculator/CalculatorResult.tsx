@@ -1,5 +1,6 @@
 import { Badge } from "@/src/components/ui/Badge";
 import { EmptyState } from "@/src/components/ui/EmptyState";
+import { formatNumber } from "@/src/lib/format-number";
 import type {
   BuildingTarget,
   DamageCalculationResult,
@@ -28,7 +29,9 @@ function getMinimumEarthquakeLabel(
 
   return minimumEarthquakes.earthquakeCount === 0
     ? "No Earthquake needed"
-    : `${minimumEarthquakes.earthquakeCount}`;
+    : `${minimumEarthquakes.earthquakeCount} Earthquake ${
+        minimumEarthquakes.earthquakeCount === 1 ? "spell" : "spells"
+      }`;
 }
 
 export function CalculatorResult({
@@ -70,7 +73,7 @@ export function CalculatorResult({
             </p>
           </div>
           <Badge tone={result.destroyed ? "success" : "warning"}>
-            Destroyed: {result.destroyed ? "Yes" : "No"}
+            {result.destroyed ? "Destroyed" : "Not destroyed"}
           </Badge>
         </div>
 
@@ -117,8 +120,9 @@ function Stat({ label, value }: { label: string; value: number }) {
       <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600">
         {label}
       </p>
-      <p className="mt-2 text-2xl font-black text-white">{value}</p>
+      <p className="mt-2 text-2xl font-black text-white">
+        {formatNumber(value)}
+      </p>
     </div>
   );
 }
-

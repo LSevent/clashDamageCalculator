@@ -162,8 +162,8 @@ function ProgressEditor({
               Set your current levels
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-              Manual progress is stored only in your browser. No Clash of Clans
-              login is required.
+              Progress is saved locally on this device. No Clash of Clans login
+              is required.
             </p>
           </div>
           <span className="w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-slate-300">
@@ -257,8 +257,9 @@ function ProgressEditor({
             />
 
             <div className="rounded-xl border border-amber-300/15 bg-amber-300/8 p-4 text-sm leading-6 text-amber-100">
-              The current static dataset is partial. Selectors only include
-              verified levels already available to the calculator.
+              Never enter your Supercell ID email, password, recovery code, or
+              2FA code. The current static dataset is partial, so selectors only
+              show levels available to the calculator.
             </div>
 
             {statusMessage && (

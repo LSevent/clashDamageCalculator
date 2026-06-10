@@ -50,7 +50,7 @@ export function ProgressSummary({ progress }: ProgressSummaryProps) {
       </div>
 
       <dl className="mt-5 divide-y divide-white/8">
-        {equipment.map((item) => (
+        {equipment.filter((item) => item.calculatorEnabled).map((item) => (
           <SummaryRow
             key={item.id}
             label={item.name}
@@ -61,7 +61,7 @@ export function ProgressSummary({ progress }: ProgressSummaryProps) {
             }
           />
         ))}
-        {spells.map((spell) => (
+        {spells.filter((spell) => spell.calculatorEnabled).map((spell) => (
           <SummaryRow
             key={spell.id}
             label={spell.name}

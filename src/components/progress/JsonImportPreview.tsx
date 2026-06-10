@@ -95,7 +95,7 @@ export function JsonImportPreview({
 
       <section className="mt-5">
         <h4 className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-400">
-          Ignored or unknown data
+          Data not used by this calculator
         </h4>
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {Object.entries(preview.unknownCounts).map(([section, count]) => (
@@ -111,8 +111,9 @@ export function JsonImportPreview({
           ))}
         </div>
         <p className="mt-3 text-xs leading-5 text-slate-500">
-          {totalUnknown} unknown item{totalUnknown === 1 ? "" : "s"} will be
-          ignored when saving.
+          {totalUnknown} unrecognized item{totalUnknown === 1 ? "" : "s"} will
+          be skipped safely. This is normal when a snapshot contains game data
+          outside the current MVP dataset.
         </p>
       </section>
 
@@ -157,4 +158,3 @@ function PreviewRow({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
-

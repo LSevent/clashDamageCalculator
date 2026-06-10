@@ -120,5 +120,18 @@ describe("user progress", () => {
     expect(hasUserProgress()).toBe(true);
     expect(getUserProgress()).toEqual(progress);
   });
-});
 
+  it.each(["manual", "json-import"] as const)(
+    "preserves the %s progress source when saving",
+    (source) => {
+      const progress = {
+        ...getDefaultUserProgress(),
+        updatedAt: "2026-06-10T12:00:00.000Z",
+        source,
+      };
+
+      expect(saveUserProgress(progress)).toBe(true);
+      expect(getUserProgress().source).toBe(source);
+    },
+  );
+});

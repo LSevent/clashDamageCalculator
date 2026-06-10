@@ -96,18 +96,18 @@ export function SpellSelector({
 
         <div className="mt-4 rounded-lg border border-white/8 bg-white/[0.03] p-3 text-sm leading-6 text-slate-400">
           <p>
-            Damage percent:{" "}
+            Earthquake deals percentage damage based on the building&apos;s
+            maximum HP:{" "}
             <span className="font-black text-white">
               {selectedLevel?.damagePercent !== undefined
                 ? `${(selectedLevel.damagePercent * 100).toFixed(0)}%`
                 : "Data unavailable"}
             </span>
           </p>
-          <p>Repeated Earthquakes use diminishing damage.</p>
+          <p>Repeated Earthquakes have a diminishing effect.</p>
           <p>Earthquake cannot finish a building by itself.</p>
         </div>
       </article>
     </section>
   );
 }
-

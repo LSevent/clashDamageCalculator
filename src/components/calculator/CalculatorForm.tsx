@@ -48,6 +48,10 @@ const earthquakeSpell = spellDefinitions.find(
   (spell) => spell.id === "earthquake-spell",
 );
 
+function getDefaultEquipmentLevel(item: EquipmentDefinition | undefined) {
+  return item?.defaultLevel ?? item?.levels.at(-1)?.level;
+}
+
 function buildInitialEquipmentSelections(savedProgress?: UserProgress) {
   return Object.fromEntries(
     equipmentDefinitions.map((item) => {
@@ -56,7 +60,7 @@ function buildInitialEquipmentSelections(savedProgress?: UserProgress) {
         (level) => level.level === savedLevel,
       )
         ? savedLevel
-        : item.defaultLevel ?? item.levels.at(-1)?.level;
+        : getDefaultEquipmentLevel(item);
 
       return [
         item.id,
@@ -325,12 +329,11 @@ function CalculatorEditor({
                     enabled,
                     level:
                       current[equipmentId]?.level ??
-                      equipmentDefinitions
-                        .find((item) => item.id === equipmentId)
-                        ?.defaultLevel ??
-                      equipmentDefinitions
-                        .find((item) => item.id === equipmentId)
-                        ?.levels.at(-1)?.level,
+                      getDefaultEquipmentLevel(
+                        equipmentDefinitions.find(
+                          (item) => item.id === equipmentId,
+                        ),
+                      ),
                   },
                 }))
               }

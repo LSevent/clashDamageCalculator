@@ -23,14 +23,14 @@ export function DataCoverageSummary({ audit }: DataCoverageSummaryProps) {
     { label: "Spells", value: audit.totalSpells },
     { label: "Spell levels", value: audit.totalSpellLevels },
     {
-      label: "Source coverage",
+      label: "Sourced level entries",
       value: coverageLabel(
         audit.coverage.withSourceUrl,
         audit.totalLevelEntries,
       ),
     },
     {
-      label: "Patch ID coverage",
+      label: "Versioned level entries",
       value: coverageLabel(audit.coverage.withPatchId, audit.totalLevelEntries),
     },
   ];
@@ -65,6 +65,10 @@ export function DataCoverageSummary({ audit }: DataCoverageSummaryProps) {
           </Card>
         ))}
       </div>
+      <p className="mt-3 text-xs leading-5 text-slate-600">
+        Coverage ratios count stored level entries, not complete in-game level
+        tables. Empty catalog entries remain visible as partial data.
+      </p>
     </section>
   );
 }

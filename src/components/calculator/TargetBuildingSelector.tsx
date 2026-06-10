@@ -2,6 +2,7 @@ import type {
   BuildingDefinition,
   BuildingLevel,
 } from "@/src/types/game/game-data";
+import { formatNumber } from "@/src/lib/format-number";
 
 type TargetBuildingSelectorProps = {
   buildings: readonly BuildingDefinition[];
@@ -32,6 +33,9 @@ export function TargetBuildingSelector({
 }: TargetBuildingSelectorProps) {
   const selectedBuilding = buildings.find(
     (building) => building.id === selectedBuildingId,
+  );
+  const selectedLevel = availableLevels.find(
+    (level) => level.level === selectedBuildingLevel,
   );
   const superchargeLevels = availableLevels
     .filter((level) => level.isSupercharged && level.superchargeLevel)
@@ -118,8 +122,16 @@ export function TargetBuildingSelector({
           {selectedBuildingLevel ? `, Level ${selectedBuildingLevel}` : ""}
           {availableLevels.length === 0
             ? ". HP data is not available yet."
-            : `, HP ${availableLevels.find((level) => level.level === selectedBuildingLevel)?.hp ?? "unknown"}.`}
+            : `, HP ${selectedLevel ? formatNumber(selectedLevel.hp) : "unknown"}.`}
         </p>
+        {availableLevels.length > 0 && (
+          <p className="mt-2 text-xs leading-5 text-slate-600">
+            Supercharge:{" "}
+            {selectedSuperchargeLevel !== undefined
+              ? `Level ${selectedSuperchargeLevel}`
+              : "Not applied"}
+          </p>
+        )}
         {selectedBuilding?.canBeSupercharged && superchargeLevels.length === 0 && (
           <p className="mt-2 text-xs leading-5 text-amber-200">
             Supercharge support exists for this building, but no supercharge HP
@@ -160,4 +172,3 @@ function SelectField({
     </label>
   );
 }
-
