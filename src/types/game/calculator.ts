@@ -1,4 +1,7 @@
-import type { SpellRepeatDamageRule } from "@/src/types/game/game-data";
+import type {
+  BuildingDefinition,
+  SpellRepeatDamageRule,
+} from "@/src/types/game/game-data";
 
 export type DamageSourceType = "equipment" | "spell";
 
@@ -140,3 +143,59 @@ export type TargetBuildingOptions = {
   superchargeLevel?: number;
 };
 
+export type AnalyzeComboAgainstTargetsInput = {
+  townHallLevel: number;
+  equipmentSources?: readonly EquipmentDamageSource[];
+  spellSources?: readonly SpellDamageSource[];
+  selectedTargetBuildingId?: string;
+  excludeSelectedTarget?: boolean;
+  buildingDefinitions?: readonly BuildingDefinition[];
+};
+
+export type CalculatedOtherTargetAnalysisResult = {
+  status: "destroyed" | "not-destroyed";
+  buildingId: string;
+  buildingName: string;
+  townHallLevel: number;
+  buildingLevel: number;
+  hp: number;
+  destroyed: boolean;
+  totalDamage: number;
+  directDamage: number;
+  spellDamage: number;
+  remainingHp: number;
+  overkillDamage: number;
+  minimumEarthquakeNeeded?: number;
+  notes: readonly string[];
+  calculationResult: DamageCalculationResult;
+};
+
+export type MissingOtherTargetAnalysisResult = {
+  status: "missing-data";
+  buildingId: string;
+  buildingName: string;
+  townHallLevel: number;
+  buildingLevel?: undefined;
+  hp?: undefined;
+  destroyed: false;
+  totalDamage?: undefined;
+  directDamage?: undefined;
+  spellDamage?: undefined;
+  remainingHp?: undefined;
+  overkillDamage?: undefined;
+  minimumEarthquakeNeeded?: undefined;
+  notes: readonly string[];
+  calculationResult?: undefined;
+};
+
+export type OtherTargetAnalysisResult =
+  | CalculatedOtherTargetAnalysisResult
+  | MissingOtherTargetAnalysisResult;
+
+export type OtherTargetAnalysisSummary = {
+  totalTargetsChecked: number;
+  destroyedCount: number;
+  notDestroyedCount: number;
+  missingDataCount: number;
+  results: readonly OtherTargetAnalysisResult[];
+};

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 
 import { buildings, equipment, spells } from "@/src/data/game";
 import {
+  analyzeComboAgainstTargets,
   calculateTotalDamage,
   createEarthquakeDamageSource,
   createEquipmentDamageSource,
@@ -25,6 +26,7 @@ import type {
 import type { UserProgress } from "@/src/types/game/user-progress";
 
 import { CalculatorResult } from "./CalculatorResult";
+import { OtherTargetResultsCard } from "./OtherTargetResultsCard";
 import {
   EquipmentSelector,
   type EquipmentSelection,
@@ -197,7 +199,7 @@ function CalculatorEditor({
   );
 
   const equipmentSources = useMemo(() => {
-    if (!target) {
+    if (!selectedBuildingId) {
       return [];
     }
 
@@ -210,11 +212,11 @@ function CalculatorEditor({
         return createEquipmentDamageSource(
           equipmentId,
           selection.level,
-          target.buildingId,
+          selectedBuildingId,
         );
       })
       .filter(isEquipmentSource);
-  }, [equipmentSelections, target]);
+  }, [equipmentSelections, selectedBuildingId]);
 
   const spellSources = useMemo(() => {
     if (
@@ -268,6 +270,21 @@ function CalculatorEditor({
       maxEarthquakes: 11,
     });
   }, [earthquakeSelection.level, equipmentSources, target]);
+  const otherTargetAnalysis = useMemo(
+    () =>
+      analyzeComboAgainstTargets({
+        townHallLevel: selectedTownHallLevel,
+        equipmentSources,
+        spellSources,
+        selectedTargetBuildingId: selectedBuildingId,
+      }),
+    [
+      equipmentSources,
+      selectedBuildingId,
+      selectedTownHallLevel,
+      spellSources,
+    ],
+  );
 
   const missingReason = getMissingReason(
     target,
@@ -373,6 +390,12 @@ function CalculatorEditor({
           />
         </Card>
       </div>
+
+      <OtherTargetResultsCard
+        analysis={otherTargetAnalysis}
+        equipmentSources={equipmentSources}
+        spellSources={spellSources}
+      />
     </div>
   );
 }

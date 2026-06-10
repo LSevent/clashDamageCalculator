@@ -30,3 +30,4 @@ export {
   getLatestPatchId,
   getMissingSourceCount,
 } from "./data-audit";
+export { analyzeComboAgainstTargets } from "./target-analysis";

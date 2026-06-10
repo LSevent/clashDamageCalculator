@@ -17,6 +17,7 @@ of Earthquakes needed for a selected setup.
 - Equipment and spell damage breakdown
 - Diminishing repeated Earthquake damage
 - Minimum Earthquake calculation
+- Other target results showing what else the selected combo can destroy
 - Manual progress saved in the browser
 - Optional user-provided JSON import with preview before saving
 - Patch history, verification status, sources, and data coverage dashboard
@@ -81,6 +82,7 @@ src/types/game/              Game, calculator, import, and progress types
 7. Data Manager and patch tracking
 7.5. Current verified gear, spell, and balance checkpoints
 8. MVP polish, tests, and documentation
+8.5. Other target results card
 
 ## Data Sources And Verification
 
@@ -150,6 +152,7 @@ save normalized progress.
 - [x] Calculator works without saved progress.
 - [x] Calculator uses manual saved progress as defaults.
 - [x] Calculator uses JSON-imported saved progress as defaults.
+- [x] Other target results work for available static building data.
 - [x] JSON import requires preview before save.
 - [x] Data Manager shows the current patch and partial status.
 - [x] About page includes the fan-content disclaimer.
