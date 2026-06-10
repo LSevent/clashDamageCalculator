@@ -19,11 +19,11 @@ describe("data audit", () => {
     expect(audit.totalEquipment).toBe(equipment.length);
     expect(audit.totalSpells).toBe(spells.length);
     expect(audit.totalBuildingLevels).toBe(1);
-    expect(audit.totalEquipmentLevels).toBe(2);
+    expect(audit.totalEquipmentLevels).toBe(25);
     expect(audit.totalSpellLevels).toBe(1);
   });
 
-  it("identifies the current patch", () => {
+  it("includes both patch records and identifies the current event", () => {
     const audit = auditGameData({
       patches,
       buildings,
@@ -32,6 +32,12 @@ describe("data audit", () => {
       currentPatchId: CURRENT_PATCH_ID,
     });
 
+    expect(audit.totalPatches).toBe(2);
+    expect(patches.map((patch) => patch.id)).toEqual([
+      "may-2026",
+      "june-2026-anime-fury",
+    ]);
+    expect(audit.currentPatch?.id).toBe("june-2026-anime-fury");
     expect(audit.currentPatch?.id).toBe(CURRENT_PATCH_ID);
   });
 
@@ -43,8 +49,20 @@ describe("data audit", () => {
       spells,
     });
 
-    expect(audit.coverage.withSourceUrl).toBe(1);
+    expect(audit.coverage.withSourceUrl).toBe(24);
     expect(audit.coverage.missingSourceUrl).toBe(3);
+  });
+
+  it("counts explicit partial and needs-review definitions", () => {
+    const audit = auditGameData({
+      patches,
+      buildings,
+      equipment,
+      spells,
+    });
+
+    expect(audit.partialDataItems).toBeGreaterThan(0);
+    expect(audit.needsReviewDataItems).toBe(1);
   });
 
   it("handles empty arrays", () => {
@@ -65,6 +83,7 @@ describe("data audit", () => {
       totalSpellLevels: 0,
       totalLevelEntries: 0,
       partialDataItems: 0,
+      needsReviewDataItems: 0,
     });
     expect(emptyAudit.currentPatch).toBeUndefined();
   });

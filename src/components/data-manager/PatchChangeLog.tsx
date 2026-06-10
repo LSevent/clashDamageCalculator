@@ -38,7 +38,11 @@ export function PatchChangeLog({ patches }: PatchChangeLogProps) {
       </h2>
 
       <div className="mt-5 grid gap-4">
-        {sortedPatches.map((patch) => (
+        {sortedPatches.map((patch) => {
+          const sourceUrls =
+            patch.sourceUrls ?? (patch.sourceUrl ? [patch.sourceUrl] : []);
+
+          return (
           <Card key={patch.id} className="p-6 sm:p-7">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
@@ -77,21 +81,27 @@ export function PatchChangeLog({ patches }: PatchChangeLogProps) {
             )}
 
             <div className="mt-5">
-              {patch.sourceUrl ? (
-                <a
-                  className="text-sm font-bold text-emerald-300 underline decoration-emerald-300/30 underline-offset-4 hover:text-emerald-200"
-                  href={patch.sourceUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Open source
-                </a>
+              {sourceUrls.length > 0 ? (
+                <span className="flex flex-wrap gap-4">
+                  {sourceUrls.map((sourceUrl, index) => (
+                    <a
+                      key={sourceUrl}
+                      className="text-sm font-bold text-emerald-300 underline decoration-emerald-300/30 underline-offset-4 hover:text-emerald-200"
+                      href={sourceUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Open source {index + 1}
+                    </a>
+                  ))}
+                </span>
               ) : (
                 <span className="text-sm text-slate-600">Source pending</span>
               )}
             </div>
           </Card>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

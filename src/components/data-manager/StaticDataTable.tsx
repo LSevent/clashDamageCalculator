@@ -1,5 +1,6 @@
 import type {
   BuildingDefinition,
+  DataVerificationStatus,
   EquipmentDefinition,
   SpellDefinition,
 } from "@/src/types/game/game-data";
@@ -23,22 +24,51 @@ function formatValue(value: string) {
 }
 
 function DataStatus({
-  isPartial,
+  verificationStatus,
   missingSourceCount,
 }: {
-  isPartial: boolean;
+  verificationStatus: DataVerificationStatus;
   missingSourceCount: number;
 }) {
+  const tone =
+    verificationStatus === "verified"
+      ? "success"
+      : verificationStatus === "partial"
+        ? "warning"
+        : "neutral";
+
   return (
     <div className="flex flex-col items-start gap-1">
-      <Badge tone={isPartial ? "warning" : "success"}>
-        {isPartial ? "Partial" : "Complete"}
+      <Badge tone={tone}>
+        {verificationStatus.replace("-", " ")}
       </Badge>
       {missingSourceCount > 0 && (
         <span className="text-xs text-slate-600">
           {missingSourceCount} source missing
         </span>
       )}
+    </div>
+  );
+}
+
+function SourceLinks({ sourceUrls }: { sourceUrls: readonly string[] }) {
+  if (sourceUrls.length === 0) {
+    return <span className="text-slate-600">Source pending</span>;
+  }
+
+  return (
+    <div className="grid gap-1">
+      {sourceUrls.map((sourceUrl, index) => (
+        <a
+          key={sourceUrl}
+          href={sourceUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="font-bold text-emerald-300 underline decoration-emerald-300/30 underline-offset-4 hover:text-emerald-200"
+        >
+          Source {index + 1}
+        </a>
+      ))}
     </div>
   );
 }
@@ -98,6 +128,7 @@ export function StaticDataTable({
                 <th className="px-5 py-3">Supercharge</th>
                 <th className="px-5 py-3">Levels</th>
                 <th className="px-5 py-3">Latest patch</th>
+                <th className="px-5 py-3">Sources</th>
                 <th className="px-5 py-3">Data status</th>
               </tr>
             </thead>
@@ -124,8 +155,11 @@ export function StaticDataTable({
                       {auditRow.latestPatchId ?? "Not added"}
                     </td>
                     <td className="px-5 py-4">
+                      <SourceLinks sourceUrls={auditRow.sourceUrls} />
+                    </td>
+                    <td className="px-5 py-4">
                       <DataStatus
-                        isPartial={auditRow.isPartial}
+                        verificationStatus={auditRow.verificationStatus}
                         missingSourceCount={auditRow.missingSourceCount}
                       />
                     </td>
@@ -149,6 +183,7 @@ export function StaticDataTable({
                 <th className="px-5 py-3">Levels</th>
                 <th className="px-5 py-3">Special rules</th>
                 <th className="px-5 py-3">Latest patch</th>
+                <th className="px-5 py-3">Sources</th>
                 <th className="px-5 py-3">Data status</th>
               </tr>
             </thead>
@@ -157,6 +192,11 @@ export function StaticDataTable({
                 const auditRow = equipmentRows[index];
                 const specialRules = item.levels.flatMap(
                   (level) => level.specialRules ?? [],
+                );
+                const hasContinuousEffects = item.levels.some(
+                  (level) =>
+                    level.damagePerSecond !== undefined ||
+                    level.regeneration !== undefined,
                 );
 
                 return (
@@ -172,14 +212,19 @@ export function StaticDataTable({
                     <td className="max-w-72 px-5 py-4">
                       {specialRules.length > 0
                         ? [...new Set(specialRules)].join(" ")
+                        : hasContinuousEffects
+                          ? "DPS and regeneration values tracked; not a one-shot calculator source."
                         : "None recorded"}
                     </td>
                     <td className="px-5 py-4">
                       {auditRow.latestPatchId ?? "Not added"}
                     </td>
                     <td className="px-5 py-4">
+                      <SourceLinks sourceUrls={auditRow.sourceUrls} />
+                    </td>
+                    <td className="px-5 py-4">
                       <DataStatus
-                        isPartial={auditRow.isPartial}
+                        verificationStatus={auditRow.verificationStatus}
                         missingSourceCount={auditRow.missingSourceCount}
                       />
                     </td>
@@ -203,6 +248,7 @@ export function StaticDataTable({
                 <th className="px-5 py-3">Levels</th>
                 <th className="px-5 py-3">Damage type</th>
                 <th className="px-5 py-3">Latest patch</th>
+                <th className="px-5 py-3">Sources</th>
                 <th className="px-5 py-3">Data status</th>
               </tr>
             </thead>
@@ -224,7 +270,9 @@ export function StaticDataTable({
                     <td className="px-5 py-4 capitalize">
                       {spell.spellType}
                     </td>
-                    <td className="px-5 py-4">{spell.housingSpace}</td>
+                    <td className="px-5 py-4">
+                      {spell.housingSpace ?? "Not recorded"}
+                    </td>
                     <td className="px-5 py-4">{auditRow.levelCount}</td>
                     <td className="px-5 py-4">
                       {hasPercentDamage
@@ -237,8 +285,11 @@ export function StaticDataTable({
                       {auditRow.latestPatchId ?? "Not added"}
                     </td>
                     <td className="px-5 py-4">
+                      <SourceLinks sourceUrls={auditRow.sourceUrls} />
+                    </td>
+                    <td className="px-5 py-4">
                       <DataStatus
-                        isPartial={auditRow.isPartial}
+                        verificationStatus={auditRow.verificationStatus}
                         missingSourceCount={auditRow.missingSourceCount}
                       />
                     </td>

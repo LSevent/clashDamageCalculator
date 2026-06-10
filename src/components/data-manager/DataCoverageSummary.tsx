@@ -50,7 +50,8 @@ export function DataCoverageSummary({ audit }: DataCoverageSummaryProps) {
           </h2>
         </div>
         <p className="text-sm text-slate-500">
-          {audit.partialDataItems} partial definitions detected
+          {audit.partialDataItems} partial and {audit.needsReviewDataItems}{" "}
+          needs-review definitions
         </p>
       </div>
 

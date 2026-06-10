@@ -22,7 +22,10 @@ import type {
   SpecialTargetRule,
   TargetBuildingOptions,
 } from "@/src/types/game/calculator";
-import type { SpellRepeatDamageRule } from "@/src/types/game/game-data";
+import type {
+  EquipmentLevel,
+  SpellRepeatDamageRule,
+} from "@/src/types/game/game-data";
 
 const EARTHQUAKE_CANNOT_FINISH_NOTE =
   "Earthquake cannot finish a building by itself.";
@@ -44,20 +47,20 @@ function getPositiveCount(count: number): number {
 }
 
 function getSpecialTargetRules(
-  equipmentId: string,
+  equipmentLevel: EquipmentLevel,
   targetBuildingId: string,
 ): readonly SpecialTargetRule[] {
-  if (equipmentId === "giant-arrow" && targetBuildingId === "air-defense") {
-    return [
-      {
-        targetBuildingId: "air-defense",
-        multiplier: 2,
-        note: "2x damage applied against Air Defense",
-      },
-    ];
-  }
-
-  return [];
+  return (equipmentLevel.targetMultipliers ?? [])
+    .filter((rule) => rule.targetBuildingId === targetBuildingId)
+    .map((rule) => ({
+      targetBuildingId: rule.targetBuildingId,
+      multiplier: rule.multiplier,
+      note: `${rule.multiplier}x damage applied against ${
+        rule.targetBuildingId === "air-defense"
+          ? "Air Defense"
+          : rule.targetBuildingId
+      }`,
+    }));
 }
 
 function getMatchingSpecialRule(
@@ -282,7 +285,7 @@ export function createEquipmentDamageSource(
   const equipment = getEquipmentById(equipmentId);
   const equipmentLevel = getEquipmentLevel(equipmentId, level);
 
-  if (!equipment || !equipmentLevel?.damage) {
+  if (!equipment?.calculatorEnabled || !equipmentLevel?.damage) {
     return undefined;
   }
 
@@ -292,7 +295,7 @@ export function createEquipmentDamageSource(
     sourceName: equipment.name,
     level: equipmentLevel.level,
     damage: equipmentLevel.damage,
-    specialTargetRules: getSpecialTargetRules(equipment.id, targetBuildingId),
+    specialTargetRules: getSpecialTargetRules(equipmentLevel, targetBuildingId),
   };
 }
 
@@ -304,7 +307,10 @@ export function createEarthquakeDamageSource(
   const spell = getSpellById(spellId);
   const spellLevel = getSpellLevel(spellId, level);
 
-  if (!spell || (!spellLevel?.damagePercent && !spellLevel?.damage)) {
+  if (
+    !spell?.calculatorEnabled ||
+    (!spellLevel?.damagePercent && !spellLevel?.damage)
+  ) {
     return undefined;
   }
 

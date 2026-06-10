@@ -1,6 +1,8 @@
 export type Village = "home" | "builder";
 
 export type PatchVerificationStatus = "verified" | "partial" | "needs-review";
+export type DataVerificationStatus = PatchVerificationStatus;
+export type DataSourceType = "official" | "manual-seed" | "third-party";
 
 export type PatchChangedItem = {
   type: "building" | "equipment" | "spell" | "other";
@@ -14,6 +16,7 @@ export type PatchInfo = {
   name: string;
   releaseDate: string;
   sourceUrl?: string;
+  sourceUrls?: readonly string[];
   notes: string;
   isCurrent: boolean;
   changedItems?: readonly PatchChangedItem[];
@@ -65,12 +68,24 @@ export type EquipmentCategory = "active" | "passive";
 export type EquipmentLevel = {
   level: number;
   damage?: number;
+  damagePerSecond?: number;
+  regeneration?: number;
   healing?: number;
   hpIncrease?: number;
   abilityDescription?: string;
   specialRules?: readonly string[];
+  targetMultipliers?: readonly EquipmentTargetMultiplier[];
   patchId: string;
   sourceUrl?: string;
+  sourceType?: DataSourceType;
+  verificationStatus?: DataVerificationStatus;
+  notes?: string;
+};
+
+export type EquipmentTargetMultiplier = {
+  targetBuildingId: string;
+  multiplier: number;
+  description: string;
 };
 
 export type EquipmentDefinition = {
@@ -80,6 +95,12 @@ export type EquipmentDefinition = {
   hero: HeroId;
   rarity: EquipmentRarity;
   category: EquipmentCategory;
+  patchId?: string;
+  sourceUrls?: readonly string[];
+  verificationStatus?: DataVerificationStatus;
+  notes?: string;
+  calculatorEnabled?: boolean;
+  defaultLevel?: number;
   levels: readonly EquipmentLevel[];
 };
 
@@ -93,6 +114,9 @@ export type SpellLevel = {
   repeatDamageRule?: SpellRepeatDamageRule;
   patchId: string;
   sourceUrl?: string;
+  sourceType?: DataSourceType;
+  verificationStatus?: DataVerificationStatus;
+  notes?: string;
 };
 
 export type SpellDefinition = {
@@ -101,7 +125,13 @@ export type SpellDefinition = {
   name: string;
   village: Village;
   spellType: SpellType;
-  housingSpace: number;
+  housingSpace?: number;
+  patchId?: string;
+  sourceUrls?: readonly string[];
+  verificationStatus?: DataVerificationStatus;
+  notes?: string;
+  calculatorEnabled?: boolean;
+  defaultLevel?: number;
   levels: readonly SpellLevel[];
 };
 

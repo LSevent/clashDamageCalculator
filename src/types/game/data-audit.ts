@@ -1,5 +1,6 @@
 import type {
   BuildingDefinition,
+  DataVerificationStatus,
   EquipmentDefinition,
   PatchInfo,
   SpellDefinition,
@@ -32,6 +33,7 @@ export type DataAuditSummary = {
   totalLevelEntries: number;
   coverage: DataCoverage;
   partialDataItems: number;
+  needsReviewDataItems: number;
 };
 
 export type StaticDataRow = {
@@ -41,4 +43,7 @@ export type StaticDataRow = {
   latestPatchId?: string;
   missingSourceCount: number;
   isPartial: boolean;
+  verificationStatus: DataVerificationStatus;
+  sourceUrls: readonly string[];
+  notes?: string;
 };

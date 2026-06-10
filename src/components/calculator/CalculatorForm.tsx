@@ -34,8 +34,12 @@ import { TargetBuildingSelector } from "./TargetBuildingSelector";
 import { Card } from "../ui/Card";
 
 const buildingDefinitions: readonly BuildingDefinition[] = buildings;
-const equipmentDefinitions: readonly EquipmentDefinition[] = equipment;
-const spellDefinitions: readonly SpellDefinition[] = spells;
+const equipmentDefinitions: readonly EquipmentDefinition[] = equipment.filter(
+  (item) => item.calculatorEnabled,
+);
+const spellDefinitions: readonly SpellDefinition[] = spells.filter(
+  (spell) => spell.calculatorEnabled,
+);
 const defaultBuilding =
   buildingDefinitions.find((building) => building.id === "scattershot") ??
   buildingDefinitions[0];
@@ -52,7 +56,7 @@ function buildInitialEquipmentSelections(savedProgress?: UserProgress) {
         (level) => level.level === savedLevel,
       )
         ? savedLevel
-        : item.levels.at(-1)?.level;
+        : item.defaultLevel ?? item.levels.at(-1)?.level;
 
       return [
         item.id,
@@ -321,6 +325,9 @@ function CalculatorEditor({
                     enabled,
                     level:
                       current[equipmentId]?.level ??
+                      equipmentDefinitions
+                        .find((item) => item.id === equipmentId)
+                        ?.defaultLevel ??
                       equipmentDefinitions
                         .find((item) => item.id === equipmentId)
                         ?.levels.at(-1)?.level,

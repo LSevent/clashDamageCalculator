@@ -5,6 +5,7 @@ import type {
 } from "@/src/types/game/data-audit";
 import type {
   BuildingDefinition,
+  DataVerificationStatus,
   EquipmentDefinition,
   SpellDefinition,
 } from "@/src/types/game/game-data";
@@ -12,6 +13,15 @@ import type {
 type VersionedLevel = {
   patchId?: string;
   sourceUrl?: string;
+  verificationStatus?: DataVerificationStatus;
+};
+
+type VersionedDefinition = {
+  patchId?: string;
+  sourceUrls?: readonly string[];
+  verificationStatus?: DataVerificationStatus;
+  notes?: string;
+  levels: readonly VersionedLevel[];
 };
 
 function getLevelCoverage(levels: readonly VersionedLevel[]) {
@@ -33,11 +43,32 @@ function getLevelCoverage(levels: readonly VersionedLevel[]) {
   );
 }
 
-function isPartialDefinition(levels: readonly VersionedLevel[]) {
+function getDefinitionStatus(
+  definition: VersionedDefinition,
+): DataVerificationStatus {
+  if (definition.verificationStatus) {
+    return definition.verificationStatus;
+  }
+
   return (
-    levels.length === 0 ||
-    levels.some((level) => !level.sourceUrl?.trim() || !level.patchId?.trim())
-  );
+    definition.levels.length === 0 ||
+    definition.levels.some(
+      (level) => !level.sourceUrl?.trim() || !level.patchId?.trim(),
+    )
+  )
+    ? "partial"
+    : "verified";
+}
+
+function getDefinitionSourceUrls(definition: VersionedDefinition) {
+  return [
+    ...new Set([
+      ...(definition.sourceUrls ?? []),
+      ...definition.levels.flatMap((level) =>
+        level.sourceUrl ? [level.sourceUrl] : [],
+      ),
+    ]),
+  ];
 }
 
 export function getLatestPatchId(
@@ -75,45 +106,73 @@ export function auditGameData(input: DataAuditInput): DataAuditSummary {
       ...input.buildings,
       ...input.equipment,
       ...input.spells,
-    ].filter((definition) => isPartialDefinition(definition.levels)).length,
+    ].filter((definition) => getDefinitionStatus(definition) === "partial")
+      .length,
+    needsReviewDataItems: [
+      ...input.buildings,
+      ...input.equipment,
+      ...input.spells,
+    ].filter(
+      (definition) => getDefinitionStatus(definition) === "needs-review",
+    ).length,
   };
 }
 
 export function createBuildingAuditRows(
   buildings: readonly BuildingDefinition[],
 ): readonly StaticDataRow[] {
-  return buildings.map((building) => ({
-    id: building.id,
-    name: building.name,
-    levelCount: building.levels.length,
-    latestPatchId: getLatestPatchId(building.levels),
-    missingSourceCount: getMissingSourceCount(building.levels),
-    isPartial: isPartialDefinition(building.levels),
-  }));
+  return buildings.map((building) => {
+    const verificationStatus = getDefinitionStatus(building);
+
+    return {
+      id: building.id,
+      name: building.name,
+      levelCount: building.levels.length,
+      latestPatchId: getLatestPatchId(building.levels),
+      missingSourceCount: getMissingSourceCount(building.levels),
+      isPartial: verificationStatus !== "verified",
+      verificationStatus,
+      sourceUrls: getDefinitionSourceUrls(building),
+    };
+  });
 }
 
 export function createEquipmentAuditRows(
   equipment: readonly EquipmentDefinition[],
 ): readonly StaticDataRow[] {
-  return equipment.map((item) => ({
-    id: item.id,
-    name: item.name,
-    levelCount: item.levels.length,
-    latestPatchId: getLatestPatchId(item.levels),
-    missingSourceCount: getMissingSourceCount(item.levels),
-    isPartial: isPartialDefinition(item.levels),
-  }));
+  return equipment.map((item) => {
+    const verificationStatus = getDefinitionStatus(item);
+
+    return {
+      id: item.id,
+      name: item.name,
+      levelCount: item.levels.length,
+      latestPatchId: getLatestPatchId(item.levels) ?? item.patchId,
+      missingSourceCount: getMissingSourceCount(item.levels),
+      isPartial: verificationStatus !== "verified",
+      verificationStatus,
+      sourceUrls: getDefinitionSourceUrls(item),
+      notes: item.notes,
+    };
+  });
 }
 
 export function createSpellAuditRows(
   spells: readonly SpellDefinition[],
 ): readonly StaticDataRow[] {
-  return spells.map((spell) => ({
-    id: spell.id,
-    name: spell.name,
-    levelCount: spell.levels.length,
-    latestPatchId: getLatestPatchId(spell.levels),
-    missingSourceCount: getMissingSourceCount(spell.levels),
-    isPartial: isPartialDefinition(spell.levels),
-  }));
+  return spells.map((spell) => {
+    const verificationStatus = getDefinitionStatus(spell);
+
+    return {
+      id: spell.id,
+      name: spell.name,
+      levelCount: spell.levels.length,
+      latestPatchId: getLatestPatchId(spell.levels) ?? spell.patchId,
+      missingSourceCount: getMissingSourceCount(spell.levels),
+      isPartial: verificationStatus !== "verified",
+      verificationStatus,
+      sourceUrls: getDefinitionSourceUrls(spell),
+      notes: spell.notes,
+    };
+  });
 }

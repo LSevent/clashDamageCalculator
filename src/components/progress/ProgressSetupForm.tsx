@@ -21,6 +21,9 @@ import { JsonImportPanel } from "./JsonImportPanel";
 import { ProgressSummary } from "./ProgressSummary";
 import { SpellProgressForm } from "./SpellProgressForm";
 
+const progressEquipment = equipment.filter((item) => item.calculatorEnabled);
+const progressSpells = spells.filter((spell) => spell.calculatorEnabled);
+
 const townHallLevels = Array.from(
   { length: MAX_TOWN_HALL_LEVEL - MIN_TOWN_HALL_LEVEL + 1 },
   (_, index) => MAX_TOWN_HALL_LEVEL - index,
@@ -224,7 +227,7 @@ function ProgressEditor({
             </section>
 
             <EquipmentProgressForm
-              equipmentItems={equipment}
+              equipmentItems={progressEquipment}
               values={draft.equipmentLevels}
               errors={errors.equipmentLevels}
               onChange={(equipmentId, level) =>
@@ -239,7 +242,7 @@ function ProgressEditor({
             />
 
             <SpellProgressForm
-              spellItems={spells}
+              spellItems={progressSpells}
               values={draft.spellLevels}
               errors={errors.spellLevels}
               onChange={(spellId, level) =>

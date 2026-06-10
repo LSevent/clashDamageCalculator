@@ -16,20 +16,34 @@ export const MAX_TOWN_HALL_LEVEL = 18;
 function getLatestKnownLevel(
   definitions: readonly {
     id: string;
+    calculatorEnabled?: boolean;
+    defaultLevel?: number;
     levels: readonly { level: number }[];
   }[],
 ) {
   return Object.fromEntries(
-    definitions.flatMap((definition) => {
-      const latestLevel = definition.levels.reduce<number | undefined>(
-        (highestLevel, level) =>
-          highestLevel === undefined || level.level > highestLevel
-            ? level.level
-            : highestLevel,
-        undefined,
-      );
-      return latestLevel === undefined ? [] : [[definition.id, latestLevel]];
-    }),
+    definitions
+      .filter((definition) => definition.calculatorEnabled)
+      .flatMap((definition) => {
+        const latestLevel = definition.levels.reduce<number | undefined>(
+          (highestLevel, level) =>
+            highestLevel === undefined || level.level > highestLevel
+              ? level.level
+              : highestLevel,
+          undefined,
+        );
+        const defaultLevel =
+          definition.defaultLevel !== undefined &&
+          definition.levels.some(
+            (level) => level.level === definition.defaultLevel,
+          )
+            ? definition.defaultLevel
+            : latestLevel;
+
+        return defaultLevel === undefined
+          ? []
+          : [[definition.id, defaultLevel]];
+      }),
   );
 }
 
@@ -121,14 +135,18 @@ export function validateUserProgress(
 
   const equipmentResult = validateLevelRecord(
     value.equipmentLevels,
-    equipment,
+    equipment.filter((item) => item.calculatorEnabled),
     "Equipment",
   );
   if (Object.keys(equipmentResult.errors).length > 0) {
     errors.equipmentLevels = equipmentResult.errors;
   }
 
-  const spellResult = validateLevelRecord(value.spellLevels, spells, "Spell");
+  const spellResult = validateLevelRecord(
+    value.spellLevels,
+    spells.filter((spell) => spell.calculatorEnabled),
+    "Spell",
+  );
   if (Object.keys(spellResult.errors).length > 0) {
     errors.spellLevels = spellResult.errors;
   }

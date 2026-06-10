@@ -82,6 +82,15 @@ describe("damage calculator", () => {
     expect(damage.finalDamage).toBe(2050);
   });
 
+  it("keeps catalog-only equipment out of calculator sources", () => {
+    expect(
+      createEquipmentDamageSource("monolith-arrow", 1, normalTarget.buildingId),
+    ).toBeUndefined();
+    expect(
+      createEquipmentDamageSource("fire-heart", 18, normalTarget.buildingId),
+    ).toBeUndefined();
+  });
+
   it("calculates Earthquake level 5 diminishing odd-denominator percentages", () => {
     const oneEarthquake = calculateEarthquakeDamage({
       source: requiredEarthquakeSource(1),

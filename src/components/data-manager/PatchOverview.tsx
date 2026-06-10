@@ -35,6 +35,8 @@ export function PatchOverview({ patch }: PatchOverviewProps) {
     );
   }
 
+  const sourceUrls = patch.sourceUrls ?? (patch.sourceUrl ? [patch.sourceUrl] : []);
+
   return (
     <Card className="overflow-hidden">
       {patch.verificationStatus !== "verified" && (
@@ -84,15 +86,20 @@ export function PatchOverview({ patch }: PatchOverviewProps) {
               Source
             </dt>
             <dd className="mt-1">
-              {patch.sourceUrl ? (
-                <a
-                  className="font-bold text-emerald-300 underline decoration-emerald-300/30 underline-offset-4 hover:text-emerald-200"
-                  href={patch.sourceUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  View patch notes
-                </a>
+              {sourceUrls.length > 0 ? (
+                <span className="grid gap-1">
+                  {sourceUrls.map((sourceUrl, index) => (
+                    <a
+                      key={sourceUrl}
+                      className="font-bold text-emerald-300 underline decoration-emerald-300/30 underline-offset-4 hover:text-emerald-200"
+                      href={sourceUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {index === 0 ? "View primary source" : `Related source ${index + 1}`}
+                    </a>
+                  ))}
+                </span>
               ) : (
                 <span className="text-slate-500">Source pending</span>
               )}
