@@ -6,9 +6,10 @@ Clash Damage Calculator is an unofficial Clash of Clans planning tool for
 checking whether selected hero equipment and Earthquake Spells can destroy a
 loaded building target.
 
-The MVP uses local, versioned TypeScript data. It shows direct damage, spell
-damage, remaining HP, overkill, source-by-source details, and the minimum number
-of Earthquakes needed for a selected setup.
+The MVP uses PostgreSQL-backed game data when configured and keeps the local,
+versioned TypeScript dataset as a seed and runtime fallback. It shows direct
+damage, spell damage, remaining HP, overkill, source-by-source details, and the
+minimum number of Earthquakes needed for a selected setup.
 
 ## Features
 
@@ -21,6 +22,7 @@ of Earthquakes needed for a selected setup.
 - Manual progress saved in the browser
 - Optional user-provided JSON import with preview before saving
 - Patch history, verification status, sources, and data coverage dashboard
+- PostgreSQL game data with automatic static fallback
 - Responsive layouts for desktop and mobile
 
 ## Tech Stack
@@ -30,6 +32,8 @@ of Earthquakes needed for a selected setup.
 - TypeScript
 - Tailwind CSS
 - Vitest
+- Prisma ORM
+- PostgreSQL
 - `localStorage` for MVP progress persistence
 
 ## Getting Started
@@ -46,6 +50,8 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+The app runs with static fallback data when `DATABASE_URL` is not configured.
+
 ## Available Scripts
 
 ```bash
@@ -55,7 +61,43 @@ npm run typecheck # Run TypeScript without emitting files
 npm test          # Run the Vitest suite once
 npm run build     # Create a production build
 npm start         # Start the production server after building
+npm run prisma:generate # Generate Prisma Client
+npm run prisma:migrate  # Create/apply a development migration
+npm run prisma:deploy   # Apply checked-in migrations in production
+npm run prisma:seed     # Upsert static seed data into PostgreSQL
+npm run db:push         # Push the schema without creating a migration
+npm run db:studio       # Open Prisma Studio
 ```
+
+## Database Setup
+
+1. Create a PostgreSQL database locally or with a provider such as Neon.
+2. Copy `.env.example` to `.env`.
+3. Replace the placeholder connection string with your database URL.
+4. Generate Prisma Client, apply the schema, and seed the database:
+
+```bash
+npm install
+npm run prisma:generate
+npm run prisma:migrate
+npm run prisma:seed
+npm run dev
+```
+
+For early local prototyping, `npm run db:push` can be used instead of a
+migration. The seed is repeatable: definitions, levels, patches, and object ID
+mappings are upserted and are not duplicated on subsequent runs.
+
+Static data files remain in `src/data/game` as the source for seeding and as the
+runtime fallback if the database is missing, empty, or unavailable.
+
+### Vercel
+
+- Add `DATABASE_URL` under the Vercel project environment variables.
+- Run `npm run prisma:deploy` and `npm run prisma:seed` through a controlled
+  deployment workflow before relying on database records in production.
+- `postinstall` generates Prisma Client during deployment.
+- The app continues with static fallback data if PostgreSQL cannot be reached.
 
 ## Project Structure
 
@@ -66,8 +108,10 @@ src/components/calculator/   Calculator inputs and results
 src/components/progress/     Manual progress and JSON import UI
 src/components/data-manager/ Patch and static-data dashboard
 src/components/ui/           Reusable presentation components
+prisma/                      Prisma schema and repeatable seed
 src/data/game/               Versioned local game data
-src/lib/game/                Pure calculations, import, storage, and audit logic
+src/lib/db/                  Server-only Prisma client setup
+src/lib/game/                Calculations, mappings, data source, import, and audit
 src/types/game/              Game, calculator, import, and progress types
 ```
 
@@ -83,12 +127,14 @@ src/types/game/              Game, calculator, import, and progress types
 7.5. Current verified gear, spell, and balance checkpoints
 8. MVP polish, tests, and documentation
 8.5. Other target results card
+9. PostgreSQL-backed game data with static seed/fallback
 
 ## Data Sources And Verification
 
-Game values are stored in `src/data/game` and associated with patch IDs and
-source URLs when available. Official Supercell patch and news pages are the
-preferred sources.
+Game values are loaded from PostgreSQL when a complete seeded dataset is
+available. Values in `src/data/game` remain the versioned seed and fallback.
+Entries are associated with patch IDs and source URLs when available. Official
+Supercell patch and news pages are the preferred sources.
 
 Definitions and level entries may be marked:
 
@@ -100,7 +146,7 @@ The Data Manager shows the current patch, tracked changes, source links, and
 coverage counts. Coverage counts describe stored level entries; they do not
 claim that every in-game level is present.
 
-## Static Data Limitations
+## Data Limitations
 
 - The dataset is intentionally incomplete.
 - Missing levels are not inferred or filled with invented values.
@@ -108,7 +154,8 @@ claim that every in-game level is present.
 - Some catalog items are visible in the Data Manager but excluded from the
   calculator because their effects are not supported or their stats are
   incomplete.
-- Calculator results depend on the accuracy of the local static data.
+- Calculator results depend on the accuracy of the active database or fallback
+  data.
 - The app does not scrape, inspect, or extract data from Clash of Clans.
 
 ## Manual Progress Setup
@@ -135,6 +182,7 @@ save normalized progress.
 - Unknown IDs are skipped safely.
 - Only allowlisted IDs are mapped.
 - Detected levels must exist in calculator-enabled static data.
+- JSON import continues to use the static object ID allowlist during Phase 9.
 - Raw pasted JSON is not stored.
 - Manual setup remains available before and after an import.
 - Saving the manual form after an import changes the source back to `manual`.
@@ -153,6 +201,8 @@ save normalized progress.
 - [x] Calculator uses manual saved progress as defaults.
 - [x] Calculator uses JSON-imported saved progress as defaults.
 - [x] Other target results work for available static building data.
+- [x] Calculator and Data Manager use database data when available.
+- [x] Static fallback keeps the app working without a database.
 - [x] JSON import requires preview before save.
 - [x] Data Manager shows the current patch and partial status.
 - [x] About page includes the fan-content disclaimer.
@@ -171,11 +221,11 @@ save normalized progress.
   needs-review.
 - Storage immunity and other building-specific spell rules are not implemented.
 - Fire Heart, Monolith Arrow, and event spells are not calculator sources.
-- There is no database, account system, admin editor, or official API import.
+- JSON import does not query database object mappings yet.
+- There is no account system, admin editor, or official API import.
 
 ## Roadmap
 
-- Phase 9: Move static data to database or dynamic storage
 - Phase 10: Add an admin data editor
 - Phase 11: Add a controlled patch update workflow
 - Future: Consider official Clash API profile import where appropriate

@@ -13,7 +13,11 @@ const statusTone = {
   "needs-review": "neutral",
 } as const;
 
-function formatDate(value: string) {
+function formatDate(value: string | undefined) {
+  if (!value) {
+    return "Not recorded";
+  }
+
   return new Intl.DateTimeFormat("en", {
     dateStyle: "medium",
     timeZone: "UTC",

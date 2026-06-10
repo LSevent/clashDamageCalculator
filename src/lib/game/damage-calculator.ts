@@ -1,11 +1,16 @@
 import {
-  getBuildingById,
-  getBuildingLevelsByTownHall,
-  getEquipmentById,
-  getEquipmentLevel,
-  getSpellById,
-  getSpellLevel,
+  getBuildingByIdFromData,
+  getBuildingLevelsByTownHallFromData,
+  getEquipmentByIdFromData,
+  getEquipmentLevelFromData,
+  getSpellByIdFromData,
+  getSpellLevelFromData,
 } from "@/src/lib/game/data-helpers";
+import {
+  buildings as staticBuildings,
+  equipment as staticEquipment,
+  spells as staticSpells,
+} from "@/src/data/game";
 import type {
   BuildingTarget,
   CalculateEarthquakeDamageParams,
@@ -23,7 +28,10 @@ import type {
   TargetBuildingOptions,
 } from "@/src/types/game/calculator";
 import type {
+  BuildingDefinition,
+  EquipmentDefinition,
   EquipmentLevel,
+  SpellDefinition,
   SpellRepeatDamageRule,
 } from "@/src/types/game/game-data";
 
@@ -281,9 +289,17 @@ export function createEquipmentDamageSource(
   equipmentId: string,
   level: number,
   targetBuildingId: string,
+  equipmentDefinitions: readonly EquipmentDefinition[] = staticEquipment,
 ): EquipmentDamageSource | undefined {
-  const equipment = getEquipmentById(equipmentId);
-  const equipmentLevel = getEquipmentLevel(equipmentId, level);
+  const equipment = getEquipmentByIdFromData(
+    equipmentDefinitions,
+    equipmentId,
+  );
+  const equipmentLevel = getEquipmentLevelFromData(
+    equipmentDefinitions,
+    equipmentId,
+    level,
+  );
 
   if (!equipment?.calculatorEnabled || !equipmentLevel?.damage) {
     return undefined;
@@ -303,9 +319,10 @@ export function createEarthquakeDamageSource(
   spellId: string,
   level: number,
   count: number,
+  spellDefinitions: readonly SpellDefinition[] = staticSpells,
 ): SpellDamageSource | undefined {
-  const spell = getSpellById(spellId);
-  const spellLevel = getSpellLevel(spellId, level);
+  const spell = getSpellByIdFromData(spellDefinitions, spellId);
+  const spellLevel = getSpellLevelFromData(spellDefinitions, spellId, level);
 
   if (
     !spell?.calculatorEnabled ||
@@ -330,14 +347,19 @@ export function getTargetBuildingFromData(
   buildingId: string,
   townHallLevel: number,
   options: TargetBuildingOptions = {},
+  buildingDefinitions: readonly BuildingDefinition[] = staticBuildings,
 ): BuildingTarget | undefined {
-  const building = getBuildingById(buildingId);
+  const building = getBuildingByIdFromData(buildingDefinitions, buildingId);
 
   if (!building) {
     return undefined;
   }
 
-  const levels = getBuildingLevelsByTownHall(buildingId, townHallLevel);
+  const levels = getBuildingLevelsByTownHallFromData(
+    buildingDefinitions,
+    buildingId,
+    townHallLevel,
+  );
   const selectedLevel =
     options.buildingLevel !== undefined
       ? levels.find((level) => level.level === options.buildingLevel)

@@ -1,0 +1,164 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Patch {
+  id                 String    @id
+  name               String
+  releaseDate        DateTime?
+  sourceUrl          String?
+  sourceUrls         Json?
+  notes              String?
+  isCurrent          Boolean   @default(false)
+  verificationStatus String
+  verifiedAt         DateTime?
+  changedItems       Json?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  buildingLevels       BuildingLevel[]
+  equipmentLevels      EquipmentLevel[]
+  spellLevels          SpellLevel[]
+  equipmentDefinitions Equipment[]      @relation("EquipmentPatch")
+  spellDefinitions     Spell[]          @relation("SpellPatch")
+}
+
+model Building {
+  id                String          @id
+  dataId            Int?
+  name              String
+  village           String
+  category          String
+  targetType        String
+  canBeSupercharged Boolean         @default(false)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  levels            BuildingLevel[]
+}
+
+model BuildingLevel {
+  id                 String   @id @default(cuid())
+  levelKey           String   @unique
+  buildingId         String
+  building           Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  level              Int
+  townHallLevel      Int?
+  hp                 Int?
+  patchId            String?
+  patch              Patch?   @relation(fields: [patchId], references: [id], onDelete: SetNull)
+  sourceUrl          String?
+  isSupercharged     Boolean  @default(false)
+  superchargeLevel   Int?
+  verificationStatus String?
+  notes              String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([buildingId, townHallLevel])
+  @@index([patchId])
+}
+
+model Equipment {
+  id                 String           @id
+  dataId             Int?
+  name               String
+  hero               String
+  rarity             String
+  category           String?
+  patchId            String?
+  patch              Patch?           @relation("EquipmentPatch", fields: [patchId], references: [id], onDelete: SetNull)
+  sourceUrls         Json?
+  verificationStatus String?
+  notes              String?
+  calculatorEnabled  Boolean          @default(false)
+  defaultLevel       Int?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  levels             EquipmentLevel[]
+
+  @@index([patchId])
+}
+
+model EquipmentLevel {
+  id                 String    @id @default(cuid())
+  equipmentId        String
+  equipment          Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  level              Int
+  damage             Int?
+  damagePerSecond    Int?
+  regeneration       Int?
+  healing            Int?
+  hpIncrease         Int?
+  abilityDescription String?
+  specialRules       Json?
+  patchId            String?
+  patch              Patch?    @relation(fields: [patchId], references: [id], onDelete: SetNull)
+  sourceUrl          String?
+  sourceType         String?
+  verificationStatus String?
+  notes              String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@unique([equipmentId, level])
+  @@index([patchId])
+}
+
+model Spell {
+  id                 String       @id
+  dataId             Int?
+  name               String
+  village            String
+  spellType          String
+  housingSpace       Int?
+  patchId            String?
+  patch              Patch?       @relation("SpellPatch", fields: [patchId], references: [id], onDelete: SetNull)
+  sourceUrls         Json?
+  verificationStatus String?
+  notes              String?
+  calculatorEnabled  Boolean      @default(false)
+  defaultLevel       Int?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  levels             SpellLevel[]
+
+  @@index([patchId])
+}
+
+model SpellLevel {
+  id                 String   @id @default(cuid())
+  spellId            String
+  spell              Spell    @relation(fields: [spellId], references: [id], onDelete: Cascade)
+  level              Int
+  damage             Int?
+  damagePercent      Float?
+  repeatDamageRule   String?
+  patchId            String?
+  patch              Patch?   @relation(fields: [patchId], references: [id], onDelete: SetNull)
+  sourceUrl          String?
+  sourceType         String?
+  verificationStatus String?
+  notes              String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([spellId, level])
+  @@index([patchId])
+}
+
+model ObjectIdMapping {
+  id          String   @id @default(cuid())
+  category    String
+  dataId      Int
+  appObjectId String
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([category, dataId])
+}

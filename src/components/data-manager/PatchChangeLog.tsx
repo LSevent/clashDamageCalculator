@@ -13,7 +13,11 @@ const statusTone = {
   "needs-review": "neutral",
 } as const;
 
-function formatDate(value: string) {
+function formatDate(value: string | undefined) {
+  if (!value) {
+    return "Not recorded";
+  }
+
   return new Intl.DateTimeFormat("en", {
     dateStyle: "medium",
     timeZone: "UTC",
@@ -22,7 +26,7 @@ function formatDate(value: string) {
 
 export function PatchChangeLog({ patches }: PatchChangeLogProps) {
   const sortedPatches = [...patches].sort((left, right) =>
-    right.releaseDate.localeCompare(left.releaseDate),
+    (right.releaseDate ?? "").localeCompare(left.releaseDate ?? ""),
   );
 
   return (

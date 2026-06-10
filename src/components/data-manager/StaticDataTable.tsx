@@ -111,7 +111,7 @@ export function StaticDataTable({
         id="static-data-heading"
         className="mt-2 text-2xl font-black text-white"
       >
-        Static data tables
+        Game data tables
       </h2>
 
       <div className="mt-5 grid gap-5">

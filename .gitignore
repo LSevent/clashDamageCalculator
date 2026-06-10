@@ -20,8 +20,11 @@ pnpm-debug.log*
 
 # environment
 .env*
+!.env.example
+
+# generated database client
+/src/generated/prisma/
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-

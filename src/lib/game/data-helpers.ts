@@ -16,29 +16,69 @@ import type {
 } from "@/src/types/game/game-data";
 
 export function getCurrentPatch(): PatchInfo | undefined {
+  return getCurrentPatchFromData(patches, CURRENT_PATCH_ID);
+}
+
+export function getCurrentPatchFromData(
+  patchData: readonly PatchInfo[],
+  currentPatchId?: string,
+): PatchInfo | undefined {
   return (
-    patches.find((patch) => patch.id === CURRENT_PATCH_ID) ??
-    patches.find((patch) => patch.isCurrent)
+    patchData.find((patch) => patch.id === currentPatchId) ??
+    patchData.find((patch) => patch.isCurrent)
   );
 }
 
 export function getBuildingById(id: string): BuildingDefinition | undefined {
-  return buildings.find((building) => building.id === id);
+  return getBuildingByIdFromData(buildings, id);
+}
+
+export function getBuildingByIdFromData(
+  buildingData: readonly BuildingDefinition[],
+  id: string,
+): BuildingDefinition | undefined {
+  return buildingData.find((building) => building.id === id);
 }
 
 export function getEquipmentById(id: string): EquipmentDefinition | undefined {
-  return equipment.find((item) => item.id === id);
+  return getEquipmentByIdFromData(equipment, id);
+}
+
+export function getEquipmentByIdFromData(
+  equipmentData: readonly EquipmentDefinition[],
+  id: string,
+): EquipmentDefinition | undefined {
+  return equipmentData.find((item) => item.id === id);
 }
 
 export function getSpellById(id: string): SpellDefinition | undefined {
-  return spells.find((spell) => spell.id === id);
+  return getSpellByIdFromData(spells, id);
+}
+
+export function getSpellByIdFromData(
+  spellData: readonly SpellDefinition[],
+  id: string,
+): SpellDefinition | undefined {
+  return spellData.find((spell) => spell.id === id);
 }
 
 export function getBuildingLevelsByTownHall(
   buildingId: string,
   townHallLevel: number,
 ): readonly BuildingLevel[] {
-  const building = getBuildingById(buildingId);
+  return getBuildingLevelsByTownHallFromData(
+    buildings,
+    buildingId,
+    townHallLevel,
+  );
+}
+
+export function getBuildingLevelsByTownHallFromData(
+  buildingData: readonly BuildingDefinition[],
+  buildingId: string,
+  townHallLevel: number,
+): readonly BuildingLevel[] {
+  const building = getBuildingByIdFromData(buildingData, buildingId);
 
   if (!building) {
     return [];
@@ -53,7 +93,15 @@ export function getEquipmentLevel(
   equipmentId: string,
   level: number,
 ): EquipmentLevel | undefined {
-  return getEquipmentById(equipmentId)?.levels.find(
+  return getEquipmentLevelFromData(equipment, equipmentId, level);
+}
+
+export function getEquipmentLevelFromData(
+  equipmentData: readonly EquipmentDefinition[],
+  equipmentId: string,
+  level: number,
+): EquipmentLevel | undefined {
+  return getEquipmentByIdFromData(equipmentData, equipmentId)?.levels.find(
     (equipmentLevel) => equipmentLevel.level === level,
   );
 }
@@ -62,8 +110,15 @@ export function getSpellLevel(
   spellId: string,
   level: number,
 ): SpellLevel | undefined {
-  return getSpellById(spellId)?.levels.find(
+  return getSpellLevelFromData(spells, spellId, level);
+}
+
+export function getSpellLevelFromData(
+  spellData: readonly SpellDefinition[],
+  spellId: string,
+  level: number,
+): SpellLevel | undefined {
+  return getSpellByIdFromData(spellData, spellId)?.levels.find(
     (spellLevel) => spellLevel.level === level,
   );
 }
-

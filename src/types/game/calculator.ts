@@ -1,5 +1,6 @@
 import type {
   BuildingDefinition,
+  EquipmentDefinition,
   SpellRepeatDamageRule,
 } from "@/src/types/game/game-data";
 
@@ -150,6 +151,7 @@ export type AnalyzeComboAgainstTargetsInput = {
   selectedTargetBuildingId?: string;
   excludeSelectedTarget?: boolean;
   buildingDefinitions?: readonly BuildingDefinition[];
+  equipmentDefinitions?: readonly EquipmentDefinition[];
 };
 
 export type CalculatedOtherTargetAnalysisResult = {

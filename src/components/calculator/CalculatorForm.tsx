@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 
-import { buildings, equipment, spells } from "@/src/data/game";
 import {
   analyzeComboAgainstTargets,
   calculateTotalDamage,
@@ -21,6 +20,7 @@ import type {
 import type {
   BuildingDefinition,
   EquipmentDefinition,
+  GameDataBundle,
   SpellDefinition,
 } from "@/src/types/game/game-data";
 import type { UserProgress } from "@/src/types/game/user-progress";
@@ -35,26 +35,14 @@ import { SpellSelector, type SpellSelection } from "./SpellSelector";
 import { TargetBuildingSelector } from "./TargetBuildingSelector";
 import { Card } from "../ui/Card";
 
-const buildingDefinitions: readonly BuildingDefinition[] = buildings;
-const equipmentDefinitions: readonly EquipmentDefinition[] = equipment.filter(
-  (item) => item.calculatorEnabled,
-);
-const spellDefinitions: readonly SpellDefinition[] = spells.filter(
-  (spell) => spell.calculatorEnabled,
-);
-const defaultBuilding =
-  buildingDefinitions.find((building) => building.id === "scattershot") ??
-  buildingDefinitions[0];
-const defaultBuildingLevel = defaultBuilding?.levels[0];
-const earthquakeSpell = spellDefinitions.find(
-  (spell) => spell.id === "earthquake-spell",
-);
-
 function getDefaultEquipmentLevel(item: EquipmentDefinition | undefined) {
   return item?.defaultLevel ?? item?.levels.at(-1)?.level;
 }
 
-function buildInitialEquipmentSelections(savedProgress?: UserProgress) {
+function buildInitialEquipmentSelections(
+  equipmentDefinitions: readonly EquipmentDefinition[],
+  savedProgress?: UserProgress,
+) {
   return Object.fromEntries(
     equipmentDefinitions.map((item) => {
       const savedLevel = savedProgress?.equipmentLevels[item.id];
@@ -103,14 +91,31 @@ function isSpellSource(
   return source !== undefined;
 }
 
-export function CalculatorForm() {
+type CalculatorFormProps = {
+  gameData: Pick<
+    GameDataBundle,
+    "source" | "buildings" | "equipment" | "spells"
+  >;
+};
+
+export function CalculatorForm({ gameData }: CalculatorFormProps) {
   const { savedProgress, hasSavedProgress } = useUserProgress();
+  const equipmentDefinitions = gameData.equipment.filter(
+    (item) => item.calculatorEnabled,
+  );
+  const spellDefinitions = gameData.spells.filter(
+    (spell) => spell.calculatorEnabled,
+  );
 
   return (
     <CalculatorEditor
-      key={savedProgress?.updatedAt ?? "default-calculator"}
+      key={`${gameData.source}-${savedProgress?.updatedAt ?? "default-calculator"}`}
       savedProgress={savedProgress}
       hasSavedProgress={hasSavedProgress}
+      dataSource={gameData.source}
+      buildingDefinitions={gameData.buildings}
+      equipmentDefinitions={equipmentDefinitions}
+      spellDefinitions={spellDefinitions}
     />
   );
 }
@@ -118,12 +123,27 @@ export function CalculatorForm() {
 type CalculatorEditorProps = {
   savedProgress: UserProgress | undefined;
   hasSavedProgress: boolean;
+  dataSource: GameDataBundle["source"];
+  buildingDefinitions: readonly BuildingDefinition[];
+  equipmentDefinitions: readonly EquipmentDefinition[];
+  spellDefinitions: readonly SpellDefinition[];
 };
 
 function CalculatorEditor({
   savedProgress,
   hasSavedProgress,
+  dataSource,
+  buildingDefinitions,
+  equipmentDefinitions,
+  spellDefinitions,
 }: CalculatorEditorProps) {
+  const defaultBuilding =
+    buildingDefinitions.find((building) => building.id === "scattershot") ??
+    buildingDefinitions[0];
+  const defaultBuildingLevel = defaultBuilding?.levels[0];
+  const earthquakeSpell = spellDefinitions.find(
+    (spell) => spell.id === "earthquake-spell",
+  );
   const [selectedTownHallLevel, setSelectedTownHallLevel] = useState(
     defaultBuildingLevel?.townHallLevel ?? 18,
   );
@@ -138,7 +158,9 @@ function CalculatorEditor({
   >(undefined);
   const [equipmentSelections, setEquipmentSelections] = useState<
     Record<string, EquipmentSelection>
-  >(() => buildInitialEquipmentSelections(savedProgress));
+  >(() =>
+    buildInitialEquipmentSelections(equipmentDefinitions, savedProgress),
+  );
   const savedEarthquakeLevel =
     savedProgress?.spellLevels["earthquake-spell"];
   const defaultEarthquakeLevel = earthquakeSpell?.levels.some(
@@ -157,7 +179,7 @@ function CalculatorEditor({
       buildingDefinitions.find(
         (building) => building.id === selectedBuildingId,
       ),
-    [selectedBuildingId],
+    [buildingDefinitions, selectedBuildingId],
   );
   const availableLevels = useMemo(
     () =>
@@ -188,9 +210,10 @@ function CalculatorEditor({
         ? getTargetBuildingFromData(selectedBuildingId, selectedTownHallLevel, {
             buildingLevel: effectiveBuildingLevel,
             superchargeLevel: effectiveSuperchargeLevel,
-          })
+          }, buildingDefinitions)
         : undefined,
     [
+      buildingDefinitions,
       selectedBuildingId,
       effectiveBuildingLevel,
       effectiveSuperchargeLevel,
@@ -213,10 +236,11 @@ function CalculatorEditor({
           equipmentId,
           selection.level,
           selectedBuildingId,
+          equipmentDefinitions,
         );
       })
       .filter(isEquipmentSource);
-  }, [equipmentSelections, selectedBuildingId]);
+  }, [equipmentDefinitions, equipmentSelections, selectedBuildingId]);
 
   const spellSources = useMemo(() => {
     if (
@@ -232,9 +256,10 @@ function CalculatorEditor({
         "earthquake-spell",
         earthquakeSelection.level,
         earthquakeSelection.count,
+        spellDefinitions,
       ),
     ].filter(isSpellSource);
-  }, [earthquakeSelection]);
+  }, [earthquakeSelection, spellDefinitions]);
 
   const result = useMemo(
     () =>
@@ -257,6 +282,7 @@ function CalculatorEditor({
       "earthquake-spell",
       earthquakeSelection.level,
       1,
+      spellDefinitions,
     );
 
     if (!earthquakeSource) {
@@ -269,7 +295,12 @@ function CalculatorEditor({
       earthquakeSource,
       maxEarthquakes: 11,
     });
-  }, [earthquakeSelection.level, equipmentSources, target]);
+  }, [
+    earthquakeSelection.level,
+    equipmentSources,
+    spellDefinitions,
+    target,
+  ]);
   const otherTargetAnalysis = useMemo(
     () =>
       analyzeComboAgainstTargets({
@@ -277,9 +308,13 @@ function CalculatorEditor({
         equipmentSources,
         spellSources,
         selectedTargetBuildingId: selectedBuildingId,
+        buildingDefinitions,
+        equipmentDefinitions,
       }),
     [
+      buildingDefinitions,
       equipmentSources,
+      equipmentDefinitions,
       selectedBuildingId,
       selectedTownHallLevel,
       spellSources,
@@ -294,6 +329,12 @@ function CalculatorEditor({
 
   return (
     <div className="mt-12">
+      <div className="mb-4 flex justify-end">
+        <Badge tone={dataSource === "database" ? "success" : "neutral"}>
+          Data source:{" "}
+          {dataSource === "database" ? "Database" : "Static fallback"}
+        </Badge>
+      </div>
       {hasSavedProgress && (
         <div className="mb-4 flex flex-col gap-2 rounded-xl border border-sky-300/15 bg-sky-300/[0.06] p-4 sm:flex-row sm:items-center sm:justify-between">
           <div>

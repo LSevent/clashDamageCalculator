@@ -46,7 +46,7 @@ export function DataCoverageSummary({ audit }: DataCoverageSummaryProps) {
             id="coverage-heading"
             className="mt-2 text-2xl font-black text-white"
           >
-            Static data snapshot
+            Game data snapshot
           </h2>
         </div>
         <p className="text-sm text-slate-500">

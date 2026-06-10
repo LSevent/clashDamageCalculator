@@ -1,4 +1,4 @@
-import { buildings } from "@/src/data/game";
+import { buildings, equipment } from "@/src/data/game";
 import type {
   AnalyzeComboAgainstTargetsInput,
   CalculatedOtherTargetAnalysisResult,
@@ -34,12 +34,14 @@ function getHighestAvailableLevel(
 function createEquipmentSourcesForTarget(
   sources: readonly EquipmentDamageSource[],
   targetBuildingId: string,
+  equipmentDefinitions: AnalyzeComboAgainstTargetsInput["equipmentDefinitions"],
 ): readonly EquipmentDamageSource[] {
   return sources.map((source) => {
     const dataSource = createEquipmentDamageSource(
       source.sourceId,
       source.level,
       targetBuildingId,
+      equipmentDefinitions,
     );
 
     if (dataSource) {
@@ -69,6 +71,7 @@ export function analyzeComboAgainstTargets({
   selectedTargetBuildingId,
   excludeSelectedTarget = true,
   buildingDefinitions = buildings,
+  equipmentDefinitions = equipment,
 }: AnalyzeComboAgainstTargetsInput): OtherTargetAnalysisSummary {
   const calculatedResults: CalculatedOtherTargetAnalysisResult[] = [];
   const missingResults: MissingOtherTargetAnalysisResult[] = [];
@@ -113,6 +116,7 @@ export function analyzeComboAgainstTargets({
       equipmentSources: createEquipmentSourcesForTarget(
         equipmentSources,
         building.id,
+        equipmentDefinitions,
       ),
       spellSources,
     });

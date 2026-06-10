@@ -1,8 +1,8 @@
 import { Card } from "@/src/components/ui/Card";
 
 const limitations = [
-  "Calculator results depend on the accuracy of local static data. Some newly changed Clash of Clans stats may be marked partial or needs-review until manually verified.",
-  "Static data is intentionally limited to values that can be represented without guessing.",
+  "Calculator results depend on the accuracy of the active database or fallback data. Some newly changed Clash of Clans stats may be marked partial or needs-review until manually verified.",
+  "Seed and fallback data is intentionally limited to values that can be represented without guessing.",
   "The app does not automatically extract data from Clash of Clans.",
   "JSON import is optional and only reads data that a user provides.",
 ];

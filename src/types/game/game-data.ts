@@ -14,7 +14,7 @@ export type PatchChangedItem = {
 export type PatchInfo = {
   id: string;
   name: string;
-  releaseDate: string;
+  releaseDate?: string;
   sourceUrl?: string;
   sourceUrls?: readonly string[];
   notes: string;
@@ -38,7 +38,7 @@ export type BuildingLevel = {
   level: number;
   townHallLevel: number;
   hp: number;
-  patchId: string;
+  patchId?: string;
   sourceUrl?: string;
   isSupercharged?: boolean;
   superchargeLevel?: number;
@@ -46,6 +46,7 @@ export type BuildingLevel = {
 
 export type BuildingDefinition = {
   id: string;
+  dataId?: number;
   name: string;
   village: Village;
   category: BuildingCategory;
@@ -75,7 +76,7 @@ export type EquipmentLevel = {
   abilityDescription?: string;
   specialRules?: readonly string[];
   targetMultipliers?: readonly EquipmentTargetMultiplier[];
-  patchId: string;
+  patchId?: string;
   sourceUrl?: string;
   sourceType?: DataSourceType;
   verificationStatus?: DataVerificationStatus;
@@ -112,7 +113,7 @@ export type SpellLevel = {
   damage?: number;
   damagePercent?: number;
   repeatDamageRule?: SpellRepeatDamageRule;
-  patchId: string;
+  patchId?: string;
   sourceUrl?: string;
   sourceType?: DataSourceType;
   verificationStatus?: DataVerificationStatus;
@@ -143,4 +144,22 @@ export type ObjectIdMap = {
   pets: Readonly<Record<number, string>>;
   units: Readonly<Record<number, string>>;
   traps: Readonly<Record<number, string>>;
+};
+
+export type GameDataSourceKind = "database" | "static-fallback";
+
+export type GameDataCatalog = {
+  patches: readonly PatchInfo[];
+  buildings: readonly BuildingDefinition[];
+  equipment: readonly EquipmentDefinition[];
+  spells: readonly SpellDefinition[];
+  objectIdMap: ObjectIdMap;
+  currentPatchId?: string;
+};
+
+export type GameDataBundle = GameDataCatalog & {
+  source: GameDataSourceKind;
+  databaseConfigured: boolean;
+  databaseEmpty: boolean;
+  fallbackReason?: string;
 };
