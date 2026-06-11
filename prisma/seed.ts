@@ -12,6 +12,7 @@ import {
 import { Prisma, PrismaClient } from "../src/generated/prisma/client";
 import {
   createBuildingLevelKey,
+  getDatabaseSeedSummary,
   serializeEquipmentRules,
 } from "../src/lib/game/db-game-data";
 import type {
@@ -28,7 +29,10 @@ if (!connectionString) {
 }
 
 const prisma = new PrismaClient({
-  adapter: new PrismaPg({ connectionString }),
+  adapter: new PrismaPg({
+    connectionString,
+    connectionTimeoutMillis: 10_000,
+  }),
 });
 const patchDefinitions: readonly PatchInfo[] = patches;
 const buildingDefinitions: readonly BuildingDefinition[] = buildings;
@@ -253,14 +257,52 @@ async function main() {
   await seedEquipment();
   await seedSpells();
   await seedObjectIdMappings();
+
+  return getDatabaseSeedSummary({
+    patches: patchDefinitions,
+    buildings: buildingDefinitions,
+    equipment: equipmentDefinitions,
+    spells: spellDefinitions,
+    objectIdMap,
+  });
+}
+
+function printSeedSummary(
+  summary: ReturnType<typeof getDatabaseSeedSummary>,
+) {
+  console.log("Database seed completed successfully.");
+  console.log(`Patches upserted: ${summary.patches}`);
+  console.log(`Buildings upserted: ${summary.buildings}`);
+  console.log(`Building levels upserted: ${summary.buildingLevels}`);
+  console.log(`Equipment upserted: ${summary.equipment}`);
+  console.log(`Equipment levels upserted: ${summary.equipmentLevels}`);
+  console.log(`Spells upserted: ${summary.spells}`);
+  console.log(`Spell levels upserted: ${summary.spellLevels}`);
+  console.log(`Object mappings upserted: ${summary.objectMappings}`);
+}
+
+function getSafeErrorCode(error: unknown) {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    typeof error.code === "string"
+  ) {
+    return ` (${error.code})`;
+  }
+
+  return "";
 }
 
 main()
-  .then(async () => {
+  .then(async (summary) => {
+    printSeedSummary(summary);
     await prisma.$disconnect();
   })
   .catch(async (error: unknown) => {
-    console.error(error);
+    console.error(
+      `Database seed failed${getSafeErrorCode(error)}. Verify DATABASE_URL, connectivity, and applied migrations.`,
+    );
     await prisma.$disconnect();
     process.exitCode = 1;
   });

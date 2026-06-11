@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { equipment, spells } from "@/src/data/game";
 
 import {
+  getDatabaseSeedSummary,
   mapDbEquipmentToEquipmentDefinition,
   mapDbSpellToSpellDefinition,
   serializeEquipmentRules,
@@ -13,6 +14,46 @@ import {
 const timestamp = new Date("2026-06-10T00:00:00.000Z");
 
 describe("database game data mapping", () => {
+  it("summarizes every static seed category without exposing raw data", () => {
+    const summary = getDatabaseSeedSummary({
+      patches: [],
+      buildings: [
+        {
+          id: "test-building",
+          name: "Test Building",
+          village: "home",
+          category: "defense",
+          targetType: "ground",
+          canBeSupercharged: false,
+          levels: [
+            {
+              level: 1,
+              townHallLevel: 1,
+              hp: 100,
+            },
+          ],
+        },
+      ],
+      equipment,
+      spells,
+      objectIdMap: {
+        buildings: { 1: "test-building" },
+        spells: {},
+        equipment: {},
+        heroes: {},
+        pets: {},
+        units: {},
+        traps: {},
+      },
+    });
+
+    expect(summary.buildings).toBe(1);
+    expect(summary.buildingLevels).toBe(1);
+    expect(summary.equipmentLevels).toBeGreaterThan(0);
+    expect(summary.spellLevels).toBeGreaterThan(0);
+    expect(summary.objectMappings).toBe(1);
+  });
+
   it("serializes static Giant Arrow rules for database seeding", () => {
     const giantArrow = equipment.find((item) => item.id === "giant-arrow");
     const level = giantArrow?.levels.find((item) => item.level === 18);

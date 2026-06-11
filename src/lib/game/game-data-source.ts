@@ -25,19 +25,23 @@ const staticCatalog: GameDataCatalog = {
 type ResolveGameDataSourceOptions = {
   databaseUrl?: string;
   loadDatabaseData?: () => Promise<GameDataCatalog>;
+  now?: () => Date;
 };
 
 function createStaticFallback(
-  databaseConfigured: boolean,
-  fallbackReason?: string,
-  databaseEmpty = false,
+  status: {
+    databaseConfigured: boolean;
+    databaseReachable: boolean | null;
+    databaseEmpty: boolean;
+    checkedAt: string;
+    fallbackReason: string;
+  },
 ): GameDataBundle {
   return {
     ...staticCatalog,
     source: "static-fallback",
-    databaseConfigured,
-    databaseEmpty,
-    fallbackReason,
+    seeded: false,
+    ...status,
   };
 }
 
@@ -67,37 +71,80 @@ async function loadConfiguredDatabaseData(): Promise<GameDataCatalog> {
 export async function resolveGameDataSource({
   databaseUrl = process.env.DATABASE_URL,
   loadDatabaseData = loadConfiguredDatabaseData,
+  now = () => new Date(),
 }: ResolveGameDataSourceOptions = {}): Promise<GameDataBundle> {
+  const checkedAt = now().toISOString();
+
   if (!databaseUrl?.trim()) {
-    return createStaticFallback(
-      false,
-      "DATABASE_URL is not configured. Static seed data is active.",
-    );
+    return createStaticFallback({
+      databaseConfigured: false,
+      databaseReachable: null,
+      databaseEmpty: false,
+      checkedAt,
+      fallbackReason:
+        "DATABASE_URL is not configured. Static fallback is being used.",
+    });
   }
 
   try {
     const databaseData = await loadDatabaseData();
 
     if (!hasUsableDatabaseData(databaseData)) {
-      return createStaticFallback(
-        true,
-        "Database has no complete game dataset yet. Run the seed command; static seed data is active.",
-        true,
-      );
+      return createStaticFallback({
+        databaseConfigured: true,
+        databaseReachable: true,
+        databaseEmpty: true,
+        checkedAt,
+        fallbackReason:
+          "Database connected but no game data found. Run the seed command. Static fallback is being used.",
+      });
     }
 
     return {
       ...databaseData,
       source: "database",
       databaseConfigured: true,
+      databaseReachable: true,
+      seeded: true,
       databaseEmpty: false,
+      checkedAt,
     };
   } catch {
-    return createStaticFallback(
-      true,
-      "Database is unavailable. Static seed data is active.",
-    );
+    return createStaticFallback({
+      databaseConfigured: true,
+      databaseReachable: false,
+      databaseEmpty: false,
+      checkedAt,
+      fallbackReason:
+        "Database unavailable. Static fallback is being used.",
+    });
   }
+}
+
+export function getGameDataCounts(data: GameDataCatalog) {
+  return {
+    patches: data.patches.length,
+    buildings: data.buildings.length,
+    equipment: data.equipment.length,
+    spells: data.spells.length,
+  };
+}
+
+export function createDataSourceHealthResponse(data: GameDataBundle) {
+  const currentPatch =
+    data.patches.find((patch) => patch.id === data.currentPatchId) ??
+    data.patches.find((patch) => patch.isCurrent);
+
+  return {
+    ok: true,
+    dataSource: data.source,
+    databaseConfigured: data.databaseConfigured,
+    databaseReachable: data.databaseReachable,
+    seeded: data.seeded,
+    currentPatch: currentPatch?.name ?? null,
+    counts: getGameDataCounts(data),
+    checkedAt: data.checkedAt,
+  };
 }
 
 export async function getGameDataSourceStatus() {
@@ -106,7 +153,10 @@ export async function getGameDataSourceStatus() {
   return {
     source: data.source,
     databaseConfigured: data.databaseConfigured,
+    databaseReachable: data.databaseReachable,
+    seeded: data.seeded,
     databaseEmpty: data.databaseEmpty,
+    checkedAt: data.checkedAt,
     fallbackReason: data.fallbackReason,
   };
 }

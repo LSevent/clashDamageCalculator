@@ -35,6 +35,17 @@ type StoredEquipmentRules = {
   targetMultipliers: readonly EquipmentTargetMultiplier[];
 };
 
+export type DatabaseSeedSummary = {
+  patches: number;
+  buildings: number;
+  buildingLevels: number;
+  equipment: number;
+  equipmentLevels: number;
+  spells: number;
+  spellLevels: number;
+  objectMappings: number;
+};
+
 const objectIdCategories = [
   "buildings",
   "spells",
@@ -158,6 +169,36 @@ export function createBuildingLevelKey(
     isSupercharged ? "supercharged" : "standard",
     superchargeLevel ?? 0,
   ].join(":");
+}
+
+export function getDatabaseSeedSummary(
+  data: Pick<
+    GameDataCatalog,
+    "patches" | "buildings" | "equipment" | "spells" | "objectIdMap"
+  >,
+): DatabaseSeedSummary {
+  return {
+    patches: data.patches.length,
+    buildings: data.buildings.length,
+    buildingLevels: data.buildings.reduce(
+      (total, building) => total + building.levels.length,
+      0,
+    ),
+    equipment: data.equipment.length,
+    equipmentLevels: data.equipment.reduce(
+      (total, item) => total + item.levels.length,
+      0,
+    ),
+    spells: data.spells.length,
+    spellLevels: data.spells.reduce(
+      (total, spell) => total + spell.levels.length,
+      0,
+    ),
+    objectMappings: Object.values(data.objectIdMap).reduce(
+      (total, mappings) => total + Object.keys(mappings).length,
+      0,
+    ),
+  };
 }
 
 export function mapDbPatchToPatchInfo(row: DbPatch): PatchInfo {

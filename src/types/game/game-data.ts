@@ -160,6 +160,9 @@ export type GameDataCatalog = {
 export type GameDataBundle = GameDataCatalog & {
   source: GameDataSourceKind;
   databaseConfigured: boolean;
+  databaseReachable: boolean | null;
+  seeded: boolean;
   databaseEmpty: boolean;
+  checkedAt: string;
   fallbackReason?: string;
 };

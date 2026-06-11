@@ -65,6 +65,7 @@ npm run prisma:generate # Generate Prisma Client
 npm run prisma:migrate  # Create/apply a development migration
 npm run prisma:deploy   # Apply checked-in migrations in production
 npm run prisma:seed     # Upsert static seed data into PostgreSQL
+npm run db:deploy       # Alias for applying production migrations
 npm run db:push         # Push the schema without creating a migration
 npm run db:studio       # Open Prisma Studio
 ```
@@ -73,7 +74,8 @@ npm run db:studio       # Open Prisma Studio
 
 1. Create a PostgreSQL database locally or with a provider such as Neon.
 2. Copy `.env.example` to `.env`.
-3. Replace the placeholder connection string with your database URL.
+3. Replace `DATABASE_URL` with the runtime connection string. Set optional
+   `DIRECT_URL` when the provider recommends a direct URL for Prisma migrations.
 4. Generate Prisma Client, apply the schema, and seed the database:
 
 ```bash
@@ -93,11 +95,19 @@ runtime fallback if the database is missing, empty, or unavailable.
 
 ### Vercel
 
-- Add `DATABASE_URL` under the Vercel project environment variables.
+- Add the pooled runtime `DATABASE_URL` under the Vercel project environment
+  variables. Use `DIRECT_URL` for controlled Prisma migration commands when
+  your provider supplies a separate direct connection.
 - Run `npm run prisma:deploy` and `npm run prisma:seed` through a controlled
   deployment workflow before relying on database records in production.
 - `postinstall` generates Prisma Client during deployment.
 - The app continues with static fallback data if PostgreSQL cannot be reached.
+- Verify deployment status at `/api/data-source-health` and `/data-manager`.
+- Keep Vercel Preview deployments on a database or branch separate from
+  production.
+
+See [Database Deployment](docs/deployment.md) for the complete local and Vercel
+runbook, and [Production Checklist](docs/production-checklist.md) before launch.
 
 ## Project Structure
 
@@ -128,6 +138,7 @@ src/types/game/              Game, calculator, import, and progress types
 8. MVP polish, tests, and documentation
 8.5. Other target results card
 9. PostgreSQL-backed game data with static seed/fallback
+9.5. Database deployment diagnostics and production verification
 
 ## Data Sources And Verification
 
@@ -203,6 +214,7 @@ save normalized progress.
 - [x] Other target results work for available static building data.
 - [x] Calculator and Data Manager use database data when available.
 - [x] Static fallback keeps the app working without a database.
+- [x] Non-sensitive data source health endpoint reports deployment status.
 - [x] JSON import requires preview before save.
 - [x] Data Manager shows the current patch and partial status.
 - [x] About page includes the fan-content disclaimer.
