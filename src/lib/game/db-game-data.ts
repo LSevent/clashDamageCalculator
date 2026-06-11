@@ -237,6 +237,8 @@ function mapDbBuildingLevel(
     sourceUrl: row.sourceUrl ?? undefined,
     isSupercharged: row.isSupercharged || undefined,
     superchargeLevel: row.superchargeLevel ?? undefined,
+    verificationStatus: getVerificationStatus(row.verificationStatus),
+    notes: row.notes ?? undefined,
   };
 }
 

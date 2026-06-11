@@ -6,6 +6,7 @@
 - [ ] `DATABASE_URL` uses the provider's pooled runtime connection when recommended.
 - [ ] `DIRECT_URL` is available to the controlled Prisma migration environment when required.
 - [ ] Preview deployments use a database or branch isolated from production.
+- [ ] A strong `ADMIN_ACCESS_KEY` is set only in trusted environments.
 - [ ] No real `.env` file or connection string is committed.
 - [ ] Checked-in migrations were applied with `npm run db:deploy`.
 - [ ] `npm run prisma:seed` completed successfully.
@@ -25,6 +26,9 @@
 - [ ] Giant Arrow applies 2x damage against Air Defense.
 - [ ] Earthquake calculations and diminishing repeats work.
 - [ ] Other target results card works.
+- [ ] `/admin` rejects invalid access keys.
+- [ ] `/admin` unlocks with the configured key.
+- [ ] Admin edits update database-backed Calculator and Data Manager results.
 
 ## Fallback And Safety
 
@@ -32,6 +36,9 @@
 - [ ] Invalid database connectivity uses static fallback without crashing.
 - [ ] Data Manager shows a friendly fallback explanation.
 - [ ] Health and UI responses expose no credentials or raw errors.
+- [ ] `ADMIN_ACCESS_KEY` is not exposed in HTML, client JavaScript, or APIs.
+- [ ] Admin editing is disabled when `ADMIN_ACCESS_KEY` is absent.
+- [ ] Static fallback data cannot be edited from the admin area.
 - [ ] No Supercell login or extraction behavior exists.
 
 ## Release Checks

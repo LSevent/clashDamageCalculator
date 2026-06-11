@@ -42,6 +42,8 @@ export type BuildingLevel = {
   sourceUrl?: string;
   isSupercharged?: boolean;
   superchargeLevel?: number;
+  verificationStatus?: DataVerificationStatus;
+  notes?: string;
 };
 
 export type BuildingDefinition = {

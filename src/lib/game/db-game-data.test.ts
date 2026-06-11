@@ -4,9 +4,11 @@ import { equipment, spells } from "@/src/data/game";
 
 import {
   getDatabaseSeedSummary,
+  mapDbBuildingToBuildingDefinition,
   mapDbEquipmentToEquipmentDefinition,
   mapDbSpellToSpellDefinition,
   serializeEquipmentRules,
+  type DbBuilding,
   type DbEquipment,
   type DbSpell,
 } from "./db-game-data";
@@ -69,6 +71,45 @@ describe("database game data mapping", () => {
         },
       ],
     });
+  });
+
+  it("preserves building-level verification metadata for the Data Manager", () => {
+    const row: DbBuilding = {
+      id: "x-bow",
+      dataId: null,
+      name: "X-Bow",
+      village: "home",
+      category: "defense",
+      targetType: "ground-and-air",
+      canBeSupercharged: true,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      levels: [
+        {
+          id: "building-level-1",
+          levelKey: "x-bow:1:9:standard:0",
+          buildingId: "x-bow",
+          level: 1,
+          townHallLevel: 9,
+          hp: 1500,
+          patchId: "may-2026",
+          sourceUrl: "https://example.com/x-bow",
+          isSupercharged: false,
+          superchargeLevel: null,
+          verificationStatus: "needs-review",
+          notes: "Check after the next balance patch.",
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        },
+      ],
+    };
+
+    const mapped = mapDbBuildingToBuildingDefinition(row);
+
+    expect(mapped.levels[0]?.verificationStatus).toBe("needs-review");
+    expect(mapped.levels[0]?.notes).toBe(
+      "Check after the next balance patch.",
+    );
   });
 
   it("maps Giant Arrow special rules back into calculator data", () => {

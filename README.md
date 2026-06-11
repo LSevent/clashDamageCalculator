@@ -23,6 +23,7 @@ minimum number of Earthquakes needed for a selected setup.
 - Optional user-provided JSON import with preview before saving
 - Patch history, verification status, sources, and data coverage dashboard
 - PostgreSQL game data with automatic static fallback
+- Protected database admin editor for small manual corrections
 - Responsive layouts for desktop and mobile
 
 ## Tech Stack
@@ -109,19 +110,51 @@ runtime fallback if the database is missing, empty, or unavailable.
 See [Database Deployment](docs/deployment.md) for the complete local and Vercel
 runbook, and [Production Checklist](docs/production-checklist.md) before launch.
 
+## Admin Data Editor
+
+The protected editor at `/admin` is intended for the project owner or trusted
+maintainers making small manual corrections. It supports patches, building HP
+rows, equipment levels and special rules, spell levels, source URLs,
+verification status, and notes.
+
+The editor requires both a reachable database and a private access key:
+
+```env
+DATABASE_URL="postgresql://..."
+ADMIN_ACCESS_KEY="use-a-strong-private-value"
+```
+
+- The access key is checked only on the server.
+- Successful access creates a signed, httpOnly, same-site cookie scoped to
+  `/admin`.
+- Every mutation checks admin access again on the server.
+- Static fallback files are read-only and are never changed by the editor.
+- Invalid URLs, values, references, and special-rules JSON are rejected before
+  database writes.
+- Only level rows can be deleted in this phase, with confirmation.
+- Bulk CSV/JSON import is not included yet.
+- Never place credentials or private notes in public data fields.
+
+For Vercel, add `ADMIN_ACCESS_KEY` and `DATABASE_URL` under Project Settings >
+Environment Variables, then redeploy. Use a strong unique key and rotate it if
+access is ever shared accidentally.
+
 ## Project Structure
 
 ```text
 app/                         Next.js pages and global layout
 components/                  Shared app shell components
+src/components/admin/        Protected admin editor components
 src/components/calculator/   Calculator inputs and results
 src/components/progress/     Manual progress and JSON import UI
 src/components/data-manager/ Patch and static-data dashboard
 src/components/ui/           Reusable presentation components
 prisma/                      Prisma schema and repeatable seed
 src/data/game/               Versioned local game data
+src/lib/admin/               Admin authentication, validation, queries, actions
 src/lib/db/                  Server-only Prisma client setup
 src/lib/game/                Calculations, mappings, data source, import, and audit
+src/types/admin.ts            Admin input and validation types
 src/types/game/              Game, calculator, import, and progress types
 ```
 
@@ -139,6 +172,7 @@ src/types/game/              Game, calculator, import, and progress types
 8.5. Other target results card
 9. PostgreSQL-backed game data with static seed/fallback
 9.5. Database deployment diagnostics and production verification
+10. Protected admin data editor for manual database corrections
 
 ## Data Sources And Verification
 
@@ -234,11 +268,13 @@ save normalized progress.
 - Storage immunity and other building-specific spell rules are not implemented.
 - Fire Heart, Monolith Arrow, and event spells are not calculator sources.
 - JSON import does not query database object mappings yet.
-- There is no account system, admin editor, or official API import.
+- The admin editor uses a single owner-managed access key rather than accounts
+  or role-based authentication.
+- Bulk import and official API import are not implemented.
 
 ## Roadmap
 
-- Phase 10: Add an admin data editor
+- Phase 10.5: Add controlled bulk data import
 - Phase 11: Add a controlled patch update workflow
 - Future: Consider official Clash API profile import where appropriate
 

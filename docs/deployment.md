@@ -10,7 +10,8 @@ complete game dataset, the app continues with the versioned static fallback.
 2. Copy `.env.example` to `.env`.
 3. Replace `DATABASE_URL` with the application connection string. If your
    provider supplies separate pooled and direct URLs, also set `DIRECT_URL` for
-   Prisma CLI migrations.
+   Prisma CLI migrations. Set `ADMIN_ACCESS_KEY` to a strong private value if
+   the admin editor should be enabled.
 4. Install dependencies and prepare the database:
 
 ```bash
@@ -60,7 +61,8 @@ configured but unreachable, then use static fallback without crashing.
    direct migration connection string.
 3. In Vercel, open **Project Settings > Environment Variables**.
 4. Add `DATABASE_URL` for the environments that need database data. Add
-   `DIRECT_URL` only where Prisma migration commands will run.
+   `DIRECT_URL` only where Prisma migration commands will run. Add a strong
+   `ADMIN_ACCESS_KEY` to enable the protected admin editor.
 5. Redeploy so the server functions receive the new variable.
 
 For Neon, use the pooled URL for the Vercel runtime and the direct URL for
@@ -90,11 +92,17 @@ After deployment:
    other-target results still load.
 7. Verify Giant Arrow applies 2x damage against Air Defense.
 8. Verify manual and JSON-imported progress still provide calculator defaults.
+9. Open `/admin`, verify an invalid key is rejected, and confirm the configured
+   key unlocks the database-only editor.
 
 ## Security Notes
 
 - Never commit `.env` or a real PostgreSQL connection string.
 - `DATABASE_URL` is server-only and must never use a `NEXT_PUBLIC_` prefix.
+- `ADMIN_ACCESS_KEY` is server-only and must never use a `NEXT_PUBLIC_` prefix.
+- Admin access uses an httpOnly, same-site cookie scoped to `/admin`; every
+  mutation rechecks the signed cookie on the server.
+- Use the admin editor only as the project owner or a trusted maintainer.
 - The health endpoint exposes only status booleans, timestamps, patch name, and
   aggregate counts.
 - The endpoint does not return credentials, URLs, raw errors, or stack traces.
