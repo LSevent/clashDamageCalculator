@@ -11,6 +11,9 @@ const statusTone = {
   verified: "success",
   partial: "warning",
   "needs-review": "neutral",
+  draft: "neutral",
+  "pending-review": "warning",
+  rejected: "neutral",
 } as const;
 
 function formatDate(value: string | undefined) {
@@ -25,7 +28,7 @@ function formatDate(value: string | undefined) {
 }
 
 function formatStatus(status: PatchInfo["verificationStatus"]) {
-  return status.replace("-", " ");
+  return status.replaceAll("-", " ");
 }
 
 export function PatchOverview({ patch }: PatchOverviewProps) {

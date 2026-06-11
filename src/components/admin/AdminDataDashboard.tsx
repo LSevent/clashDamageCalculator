@@ -34,6 +34,11 @@ const sections = [
     label: "Spells",
     description: "Spell definitions, level stats, and repeat-damage rules.",
   },
+  {
+    href: "/admin/data/import-export",
+    label: "Bulk import / export",
+    description: "Preview curated CSV stat-table updates and export database rows.",
+  },
 ];
 
 export function AdminDataDashboard({

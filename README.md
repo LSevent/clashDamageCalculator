@@ -132,12 +132,53 @@ ADMIN_ACCESS_KEY="use-a-strong-private-value"
 - Invalid URLs, values, references, and special-rules JSON are rejected before
   database writes.
 - Only level rows can be deleted in this phase, with confirmation.
-- Bulk CSV/JSON import is not included yet.
+- Bulk CSV import/export is available for curated stat-table updates.
 - Never place credentials or private notes in public data fields.
 
 For Vercel, add `ADMIN_ACCESS_KEY` and `DATABASE_URL` under Project Settings >
 Environment Variables, then redeploy. Use a strong unique key and rotate it if
 access is ever shared accidentally.
+
+## Admin Bulk Import/Export
+
+The protected `/admin/data/import-export` page supports database CSV workflows
+for building HP rows, equipment levels, and spell levels.
+
+- Admin access and a reachable database are required.
+- Every CSV import is parsed, validated, and compared with current database
+  rows before saving.
+- The preview marks rows as create, update, unchanged, invalid, or skipped.
+- Invalid rows are never saved.
+- Rows marked `rejected` are intentionally skipped.
+- A missing `verificationStatus` defaults to `needs-review`.
+- Commit repeats parsing, validation, and comparison on the server and applies
+  create/update rows in one transaction.
+- Imports are limited to 1 MB and 5,000 data rows.
+- Current database data and example templates can be downloaded as CSV.
+- Static fallback files are not modified.
+- This is for curated, admin-reviewed data only. The app does not fetch,
+  scrape, or extract Clash of Clans data.
+
+Building HP example:
+
+```csv
+buildingId,buildingName,townHallLevel,level,hp,isSupercharged,superchargeLevel,patchId,sourceUrl,verificationStatus,notes
+scattershot,Scattershot,18,7,5800,false,,may-2026,https://example.com,needs-review,TH18 max defense
+```
+
+Equipment level example:
+
+```csv
+equipmentId,equipmentName,level,damage,healing,hpIncrease,abilityDescription,specialRules,patchId,sourceUrl,verificationStatus,notes
+giant-arrow,Giant Arrow,18,1500,,,Shoots a giant arrow,"{""targetMultipliers"":[{""targetBuildingId"":""air-defense"",""multiplier"":2}]}",may-2026,https://example.com,verified,2x Air Defense rule
+```
+
+Spell level example:
+
+```csv
+spellId,spellName,level,damage,damagePercent,repeatDamageRule,patchId,sourceUrl,verificationStatus,notes
+earthquake-spell,Earthquake Spell,5,,0.29,diminishing-odd-denominator,may-2026,https://example.com,needs-review,Percentage damage
+```
 
 ## Project Structure
 
@@ -173,6 +214,7 @@ src/types/game/              Game, calculator, import, and progress types
 9. PostgreSQL-backed game data with static seed/fallback
 9.5. Database deployment diagnostics and production verification
 10. Protected admin data editor for manual database corrections
+10.5. Protected CSV import/export for database stat tables
 
 ## Data Sources And Verification
 
@@ -270,11 +312,10 @@ save normalized progress.
 - JSON import does not query database object mappings yet.
 - The admin editor uses a single owner-managed access key rather than accounts
   or role-based authentication.
-- Bulk import and official API import are not implemented.
+- Official API import is not implemented.
 
 ## Roadmap
 
-- Phase 10.5: Add controlled bulk data import
 - Phase 11: Add a controlled patch update workflow
 - Future: Consider official Clash API profile import where appropriate
 

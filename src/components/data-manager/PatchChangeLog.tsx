@@ -11,6 +11,9 @@ const statusTone = {
   verified: "success",
   partial: "warning",
   "needs-review": "neutral",
+  draft: "neutral",
+  "pending-review": "warning",
+  rejected: "neutral",
 } as const;
 
 function formatDate(value: string | undefined) {
@@ -56,7 +59,7 @@ export function PatchChangeLog({ patches }: PatchChangeLogProps) {
                 </p>
               </div>
               <Badge tone={statusTone[patch.verificationStatus]}>
-                {patch.verificationStatus.replace("-", " ")}
+                {patch.verificationStatus.replaceAll("-", " ")}
               </Badge>
             </div>
 

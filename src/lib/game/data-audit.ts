@@ -50,6 +50,25 @@ function getDefinitionStatus(
     return definition.verificationStatus;
   }
 
+  const statuses = definition.levels
+    .map((level) => level.verificationStatus)
+    .filter(
+      (status): status is DataVerificationStatus => status !== undefined,
+    );
+  const priority: readonly DataVerificationStatus[] = [
+    "rejected",
+    "needs-review",
+    "draft",
+    "pending-review",
+    "partial",
+    "verified",
+  ];
+  const explicitStatus = priority.find((status) => statuses.includes(status));
+
+  if (explicitStatus && explicitStatus !== "verified") {
+    return explicitStatus;
+  }
+
   return (
     definition.levels.length === 0 ||
     definition.levels.some(
@@ -106,8 +125,11 @@ export function auditGameData(input: DataAuditInput): DataAuditSummary {
       ...input.buildings,
       ...input.equipment,
       ...input.spells,
-    ].filter((definition) => getDefinitionStatus(definition) === "partial")
-      .length,
+    ].filter((definition) =>
+      ["draft", "pending-review", "partial", "rejected"].includes(
+        getDefinitionStatus(definition),
+      ),
+    ).length,
     needsReviewDataItems: [
       ...input.buildings,
       ...input.equipment,

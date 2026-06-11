@@ -33,14 +33,15 @@ function DataStatus({
   const tone =
     verificationStatus === "verified"
       ? "success"
-      : verificationStatus === "partial"
+      : verificationStatus === "partial" ||
+          verificationStatus === "pending-review"
         ? "warning"
         : "neutral";
 
   return (
     <div className="flex flex-col items-start gap-1">
       <Badge tone={tone}>
-        {verificationStatus.replace("-", " ")}
+        {verificationStatus.replaceAll("-", " ")}
       </Badge>
       {missingSourceCount > 0 && (
         <span className="text-xs text-slate-600">

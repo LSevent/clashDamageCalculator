@@ -29,6 +29,10 @@
 - [ ] `/admin` rejects invalid access keys.
 - [ ] `/admin` unlocks with the configured key.
 - [ ] Admin edits update database-backed Calculator and Data Manager results.
+- [ ] Bulk export and template routes reject unauthenticated requests.
+- [ ] CSV preview and commit reject unauthenticated requests.
+- [ ] Invalid CSV rows are shown in preview and are not saved.
+- [ ] A reviewed test row updates database-backed public data as expected.
 
 ## Fallback And Safety
 

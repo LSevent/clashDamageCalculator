@@ -12,6 +12,7 @@ const adminNavigation = [
   { href: "/admin/data/buildings", label: "Buildings" },
   { href: "/admin/data/equipment", label: "Equipment" },
   { href: "/admin/data/spells", label: "Spells" },
+  { href: "/admin/data/import-export", label: "Import / Export" },
 ];
 
 type AdminLayoutProps = {

@@ -70,8 +70,11 @@ function getVerificationStatus(
   value: string | null | undefined,
 ): DataVerificationStatus | undefined {
   return value === "verified" ||
+    value === "draft" ||
+    value === "pending-review" ||
     value === "partial" ||
-    value === "needs-review"
+    value === "needs-review" ||
+    value === "rejected"
     ? value
     : undefined;
 }

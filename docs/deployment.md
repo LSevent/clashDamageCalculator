@@ -94,6 +94,8 @@ After deployment:
 8. Verify manual and JSON-imported progress still provide calculator defaults.
 9. Open `/admin`, verify an invalid key is rejected, and confirm the configured
    key unlocks the database-only editor.
+10. Open `/admin/data/import-export`, download a template, preview a harmless
+    curated row, and confirm invalid rows cannot be committed.
 
 ## Security Notes
 
@@ -103,6 +105,8 @@ After deployment:
 - Admin access uses an httpOnly, same-site cookie scoped to `/admin`; every
   mutation rechecks the signed cookie on the server.
 - Use the admin editor only as the project owner or a trusted maintainer.
+- Bulk imports are limited, previewed, revalidated on commit, and never modify
+  static fallback files.
 - The health endpoint exposes only status booleans, timestamps, patch name, and
   aggregate counts.
 - The endpoint does not return credentials, URLs, raw errors, or stack traces.

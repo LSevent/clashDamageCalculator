@@ -1,6 +1,12 @@
 export type Village = "home" | "builder";
 
-export type PatchVerificationStatus = "verified" | "partial" | "needs-review";
+export type PatchVerificationStatus =
+  | "draft"
+  | "pending-review"
+  | "partial"
+  | "verified"
+  | "needs-review"
+  | "rejected";
 export type DataVerificationStatus = PatchVerificationStatus;
 export type DataSourceType = "official" | "manual-seed" | "third-party";
 
