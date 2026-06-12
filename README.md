@@ -26,6 +26,7 @@ minimum number of Earthquakes needed for a selected setup.
 - Protected database admin editor for small manual corrections
 - Admin-only official update checker for review-only blog post detection
 - Patch draft creation from reviewed official update detections
+- Admin-reviewed suggested stat change workflow with separate approval and apply
 - Responsive layouts for desktop and mobile
 
 ## Tech Stack
@@ -201,8 +202,6 @@ configured official Clash of Clans public news sources.
   files.
 - Ignored results remain stored for review history.
 
-Phase 11C will add a separate suggested stat-change review workflow.
-
 ## Patch Draft Creation
 
 Authenticated admins can create a draft patch from an existing official update
@@ -228,8 +227,39 @@ Draft creation:
 - Prevents duplicate drafts for the same update result or official source URL.
 - Does not create building, equipment, or spell definitions or level rows.
 
-Phase 11C will add suggested stat-change review. Suggestions will remain
-separate from calculator-active data until an admin approves them.
+## Suggested Stat Change Review Workflow
+
+Authenticated admins can generate conservative suggestions from a patch draft
+at `/admin/patches/[patchId]/suggestions` and review all suggestions at
+`/admin/stat-changes`.
+
+Workflow:
+
+1. Check official updates.
+2. Create a patch draft.
+3. Generate suggestions from the patch's stored official source URL or a
+   reviewed official source excerpt.
+4. Review and edit exact suggestions or review hints.
+5. Approve, reject, or mark suggestions as needs-info.
+6. Apply an approved exact suggestion with a separate action.
+7. Verify the Calculator and Data Manager after apply.
+
+Safety behavior:
+
+- Suggestions are stored in a separate inactive database table.
+- Suggestions may contain exact stat candidates or non-applicable review hints.
+- The parser recognizes only clear level, field, and value patterns.
+- When parsing is uncertain, it creates a hint instead of inventing values.
+- Exact suggestions capture the current database value for comparison.
+- Admins can correct targets and final values before approval.
+- Approval does not update calculator data.
+- Calculator data changes only when an approved exact suggestion is applied.
+- Review hints cannot be applied.
+- Rejected, needs-info, and applied suggestions cannot be applied.
+- Applied suggestions are read-only and cannot be applied twice.
+- Only official URLs already stored on the patch/update result are fetched.
+- Pasted excerpts are capped at 20,000 characters.
+- Static fallback files are never modified.
 
 ## Project Structure
 
@@ -268,6 +298,7 @@ src/types/game/              Game, calculator, import, and progress types
 10.5. Protected CSV import/export for database stat tables
 11A. Admin-only official update checker with saved review results
 11B. Patch draft creation from reviewed official update detections
+11C. Suggested stat change review, approval, and explicit apply workflow
 
 ## Data Sources And Verification
 
@@ -370,11 +401,12 @@ save normalized progress.
 - Official update classifications are keyword-based hints for admin review and
   are not treated as verified stat data.
 - Draft patches are review metadata only and do not change calculator results.
+- Pending and approved suggestions remain inactive until explicitly applied.
 - Official API import is not implemented.
 
 ## Roadmap
 
-- Phase 11C: Add suggested stat-change extraction and review
+- Future: Add richer manually curated parser templates and approval audit logs
 - Future: Consider official Clash API profile import where appropriate
 
 ## Disclaimer

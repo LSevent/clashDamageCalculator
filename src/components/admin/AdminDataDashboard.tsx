@@ -44,6 +44,11 @@ const sections = [
     label: "Official update checker",
     description: "Check configured official news sources for review-only post detections.",
   },
+  {
+    href: "/admin/stat-changes",
+    label: "Stat change suggestions",
+    description: "Review, approve, reject, and apply patch-linked stat suggestions.",
+  },
 ];
 
 export function AdminDataDashboard({

@@ -23,11 +23,12 @@ model Patch {
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
 
-  buildingLevels       BuildingLevel[]
-  equipmentLevels      EquipmentLevel[]
-  spellLevels          SpellLevel[]
-  equipmentDefinitions Equipment[]      @relation("EquipmentPatch")
-  spellDefinitions     Spell[]          @relation("SpellPatch")
+  buildingLevels        BuildingLevel[]
+  equipmentLevels       EquipmentLevel[]
+  spellLevels           SpellLevel[]
+  equipmentDefinitions  Equipment[]            @relation("EquipmentPatch")
+  spellDefinitions      Spell[]                @relation("SpellPatch")
+  statChangeSuggestions StatChangeSuggestion[]
 }
 
 model Building {
@@ -193,4 +194,40 @@ model UpdateCheckResult {
 
   @@index([sourceId, status])
   @@index([checkedAt])
+}
+
+model StatChangeSuggestion {
+  id                 String    @id @default(cuid())
+  patchId            String
+  patch              Patch     @relation(fields: [patchId], references: [id], onDelete: Cascade)
+  sourceUrl          String?
+  sourceTitle        String?
+  sourceExcerpt      String?
+  targetKind         String
+  targetId           String?
+  targetName         String?
+  level              Int?
+  townHallLevel      Int?
+  isSupercharged     Boolean?
+  superchargeLevel   Int?
+  fieldName          String?
+  oldValue           Json?
+  suggestedValue     Json?
+  finalValue         Json?
+  confidence         String
+  status             String
+  verificationStatus String?
+  notes              String?
+  parserNotes        String?
+  createdBy          String?
+  reviewedBy         String?
+  reviewedAt         DateTime?
+  appliedAt          DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([patchId])
+  @@index([status])
+  @@index([targetKind])
+  @@index([targetId])
 }

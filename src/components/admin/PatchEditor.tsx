@@ -159,6 +159,12 @@ export function PatchEditor({
                     Open source
                   </a>
                 ) : null}
+                <a
+                  className="text-sm font-bold text-violet-300 hover:text-violet-200"
+                  href={`/admin/patches/${encodeURIComponent(patch.id)}/suggestions`}
+                >
+                  Review stat suggestions
+                </a>
                 <VerificationBadge status={patch.verificationStatus} />
               </div>
             </div>
