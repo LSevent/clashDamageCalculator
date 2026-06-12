@@ -51,6 +51,7 @@ export function UpdateCheckerDashboard({
     ["New posts", data.newPostCount],
     ["Already known", data.alreadyKnownPostCount],
     ["Ignored", data.ignoredPostCount],
+    ["Patch drafts", data.patchDraftCount],
   ] as const;
 
   return (
@@ -85,7 +86,7 @@ export function UpdateCheckerDashboard({
           </div>
         </div>
 
-        <dl className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <dl className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {metrics.map(([label, value]) => (
             <div
               key={label}

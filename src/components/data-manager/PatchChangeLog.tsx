@@ -31,6 +31,9 @@ export function PatchChangeLog({ patches }: PatchChangeLogProps) {
   const sortedPatches = [...patches].sort((left, right) =>
     (right.releaseDate ?? "").localeCompare(left.releaseDate ?? ""),
   );
+  const hasDrafts = sortedPatches.some(
+    (patch) => patch.verificationStatus === "draft",
+  );
 
   return (
     <section aria-labelledby="change-log-heading">
@@ -43,6 +46,13 @@ export function PatchChangeLog({ patches }: PatchChangeLogProps) {
       >
         Patch change log
       </h2>
+
+      {hasDrafts ? (
+        <p className="mt-4 rounded-xl border border-violet-300/15 bg-violet-300/[0.06] p-4 text-sm leading-6 text-violet-100/80">
+          Draft patches are review records only. They do not affect calculator
+          data until stat changes are reviewed and approved separately.
+        </p>
+      ) : null}
 
       <div className="mt-5 grid gap-4">
         {sortedPatches.map((patch) => {

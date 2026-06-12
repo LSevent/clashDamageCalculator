@@ -8,18 +8,20 @@ datasource db {
 }
 
 model Patch {
-  id                 String    @id
-  name               String
-  releaseDate        DateTime?
-  sourceUrl          String?
-  sourceUrls         Json?
-  notes              String?
-  isCurrent          Boolean   @default(false)
-  verificationStatus String
-  verifiedAt         DateTime?
-  changedItems       Json?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  id                  String             @id
+  name                String
+  releaseDate         DateTime?
+  sourceUrl           String?
+  sourceUrls          Json?
+  notes               String?
+  isCurrent           Boolean            @default(false)
+  verificationStatus  String
+  verifiedAt          DateTime?
+  changedItems        Json?
+  updateCheckResultId String?            @unique
+  updateCheckResult   UpdateCheckResult? @relation(fields: [updateCheckResultId], references: [id], onDelete: SetNull)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
 
   buildingLevels       BuildingLevel[]
   equipmentLevels      EquipmentLevel[]
@@ -187,6 +189,7 @@ model UpdateCheckResult {
   checkedAt    DateTime     @default(now())
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
+  patch        Patch?
 
   @@index([sourceId, status])
   @@index([checkedAt])

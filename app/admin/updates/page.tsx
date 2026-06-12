@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { AdminGate } from "@/src/components/admin/AdminGate";
 import { AdminLayout } from "@/src/components/admin/AdminLayout";
+import { AdminNotice } from "@/src/components/admin/AdminNotice";
 import { UpdateCheckerDashboard } from "@/src/components/admin/UpdateCheckerDashboard";
 import { getAdminAuthState } from "@/src/lib/admin/admin-auth";
 import { getUpdateCheckerDashboardData } from "@/src/lib/admin/update-checker";
@@ -36,6 +37,7 @@ export default async function AdminUpdatesPage({ searchParams }: PageProps) {
 
   return (
     <AdminLayout>
+      <AdminNotice error={params.error} message={params.message} />
       <div className="mb-7">
         <h2 className="text-2xl font-black text-white">
           Official Update Checker

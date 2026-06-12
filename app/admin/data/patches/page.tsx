@@ -15,7 +15,11 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 type PageProps = {
-  searchParams: Promise<{ error?: string; message?: string }>;
+  searchParams: Promise<{
+    error?: string;
+    message?: string;
+    patch?: string;
+  }>;
 };
 
 export default async function AdminPatchesPage({ searchParams }: PageProps) {
@@ -41,7 +45,10 @@ export default async function AdminPatchesPage({ searchParams }: PageProps) {
         </p>
       </div>
       {patches.available ? (
-        <PatchEditor patches={patches.data} />
+        <PatchEditor
+          patches={patches.data}
+          selectedPatchId={params.patch}
+        />
       ) : (
         <Card className="p-6 text-sm text-amber-100">{patches.message}</Card>
       )}

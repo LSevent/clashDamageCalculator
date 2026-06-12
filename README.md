@@ -25,6 +25,7 @@ minimum number of Earthquakes needed for a selected setup.
 - PostgreSQL game data with automatic static fallback
 - Protected database admin editor for small manual corrections
 - Admin-only official update checker for review-only blog post detection
+- Patch draft creation from reviewed official update detections
 - Responsive layouts for desktop and mobile
 
 ## Tech Stack
@@ -193,13 +194,42 @@ configured official Clash of Clans public news sources.
 - Uses a five-minute cooldown per source and a short server-side timeout.
 - Saves detected post titles, official URLs, dates when available,
   classifications, and review statuses.
-- Does not update calculator stats, create patches, or create stat rows.
+- The check operation itself does not update calculator stats, create patches,
+  or create stat rows.
+- Can hand a reviewed detection to the separate patch-draft workflow.
 - Does not inspect the Clash of Clans app, packets, memory, emulators, or game
   files.
 - Ignored results remain stored for review history.
 
-Phase 11B will allow creating patch drafts from reviewed detections. Phase 11C
-will add a separate suggested stat-change review workflow.
+Phase 11C will add a separate suggested stat-change review workflow.
+
+## Patch Draft Creation
+
+Authenticated admins can create a draft patch from an existing official update
+checker result. This requires database access and never writes calculator stat
+rows.
+
+Workflow:
+
+1. Check configured official sources from `/admin/updates`.
+2. Review the detected title, date, type, and official source.
+3. Select **Create Patch Draft**.
+4. Open the linked draft in the existing Patch Editor.
+5. Review the source and add or import stat changes separately.
+6. Calculator data changes only when reviewed stat rows are applied through the
+   existing admin workflows.
+
+Draft creation:
+
+- Sets verification status to `draft`.
+- Keeps `isCurrent` false and leaves `verifiedAt` empty.
+- Uses the detected official URL and published date when available.
+- Adds generic category review hints without inventing exact changed stats.
+- Prevents duplicate drafts for the same update result or official source URL.
+- Does not create building, equipment, or spell definitions or level rows.
+
+Phase 11C will add suggested stat-change review. Suggestions will remain
+separate from calculator-active data until an admin approves them.
 
 ## Project Structure
 
@@ -237,6 +267,7 @@ src/types/game/              Game, calculator, import, and progress types
 10. Protected admin data editor for manual database corrections
 10.5. Protected CSV import/export for database stat tables
 11A. Admin-only official update checker with saved review results
+11B. Patch draft creation from reviewed official update detections
 
 ## Data Sources And Verification
 
@@ -338,11 +369,11 @@ save normalized progress.
   or role-based authentication.
 - Official update classifications are keyword-based hints for admin review and
   are not treated as verified stat data.
+- Draft patches are review metadata only and do not change calculator results.
 - Official API import is not implemented.
 
 ## Roadmap
 
-- Phase 11B: Create patch drafts from reviewed official post detections
 - Phase 11C: Add suggested stat-change extraction and review
 - Future: Consider official Clash API profile import where appropriate
 

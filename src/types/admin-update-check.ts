@@ -14,6 +14,7 @@ export const updateResultStatuses = [
   "new",
   "already-known",
   "ignored",
+  "patch-draft-created",
 ] as const;
 
 export type UpdateResultStatus = (typeof updateResultStatuses)[number];
@@ -62,6 +63,11 @@ export type UpdateCheckResultView = {
   detectedType: UpdateDetectedType;
   status: UpdateResultStatus;
   checkedAt: string;
+  patch: {
+    id: string;
+    name: string;
+    verificationStatus: string;
+  } | null;
 };
 
 export type UpdateCheckerDashboardData = {
@@ -71,7 +77,15 @@ export type UpdateCheckerDashboardData = {
   newPostCount: number;
   alreadyKnownPostCount: number;
   ignoredPostCount: number;
+  patchDraftCount: number;
   lastCheckedAt: string | null;
+};
+
+export type PatchDraftActionState = {
+  ok: boolean;
+  message: string;
+  patchId?: string;
+  existing?: boolean;
 };
 
 export type UpdateCheckerDashboardResult =

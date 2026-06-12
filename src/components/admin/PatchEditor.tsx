@@ -12,6 +12,7 @@ import { VerificationBadge } from "./VerificationBadge";
 
 type PatchEditorProps = {
   patches: readonly AdminPatchRow[];
+  selectedPatchId?: string;
 };
 
 function dateValue(value: Date | null) {
@@ -108,7 +109,10 @@ function PatchForm({ patch }: { patch?: AdminPatchRow }) {
   );
 }
 
-export function PatchEditor({ patches }: PatchEditorProps) {
+export function PatchEditor({
+  patches,
+  selectedPatchId,
+}: PatchEditorProps) {
   return (
     <div className="grid gap-6">
       <details
@@ -126,18 +130,37 @@ export function PatchEditor({ patches }: PatchEditorProps) {
       {patches.map((patch) => (
         <details
           key={patch.id}
+          id={`patch-${patch.id}`}
           className="rounded-2xl border border-white/8 bg-white/[0.035] p-5 sm:p-6"
+          open={patch.id === selectedPatchId}
         >
           <summary className="cursor-pointer list-none">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="font-black text-white">{patch.name}</p>
+                {patch.updateCheckResultId ? (
+                  <p className="mt-2 text-xs font-bold text-violet-300">
+                    Created from official update checker
+                  </p>
+                ) : null}
                 <p className="mt-1 text-xs text-slate-500">
                   {patch.id}
                   {patch.isCurrent ? " · Current patch" : ""}
                 </p>
               </div>
-              <VerificationBadge status={patch.verificationStatus} />
+              <div className="flex flex-wrap items-center gap-3">
+                {patch.sourceUrl ? (
+                  <a
+                    className="text-sm font-bold text-emerald-300 hover:text-emerald-200"
+                    href={patch.sourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Open source
+                  </a>
+                ) : null}
+                <VerificationBadge status={patch.verificationStatus} />
+              </div>
             </div>
           </summary>
           <div className="mt-6 border-t border-white/8 pt-6">

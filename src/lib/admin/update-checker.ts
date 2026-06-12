@@ -251,6 +251,13 @@ export async function getUpdateCheckerDashboardData(): Promise<UpdateCheckerDash
           source: {
             select: { name: true },
           },
+          patch: {
+            select: {
+              id: true,
+              name: true,
+              verificationStatus: true,
+            },
+          },
         },
         orderBy: [
           { publishedAt: { sort: "desc", nulls: "last" } },
@@ -269,6 +276,7 @@ export async function getUpdateCheckerDashboardData(): Promise<UpdateCheckerDash
       detectedType: asDetectedType(result.detectedType),
       status: asResultStatus(result.status),
       checkedAt: result.checkedAt.toISOString(),
+      patch: result.patch,
     }));
     const lastCheckedAt = sources.reduce<Date | null>(
       (latest, source) =>
@@ -299,6 +307,9 @@ export async function getUpdateCheckerDashboardData(): Promise<UpdateCheckerDash
         ).length,
         ignoredPostCount: resultViews.filter(
           (result) => result.status === "ignored",
+        ).length,
+        patchDraftCount: resultViews.filter(
+          (result) => result.status === "patch-draft-created",
         ).length,
         lastCheckedAt: lastCheckedAt?.toISOString() ?? null,
       },

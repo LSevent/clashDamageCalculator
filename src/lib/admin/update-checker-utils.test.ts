@@ -124,4 +124,10 @@ describe("detected result status", () => {
   it("preserves ignored status", () => {
     expect(getDetectedPostStatus("ignored")).toBe("ignored");
   });
+
+  it("preserves patch draft status", () => {
+    expect(getDetectedPostStatus("patch-draft-created")).toBe(
+      "patch-draft-created",
+    );
+  });
 });

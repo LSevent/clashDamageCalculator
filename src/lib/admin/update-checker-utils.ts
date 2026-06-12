@@ -170,5 +170,8 @@ export function getDetectedPostStatus(
     return "new";
   }
 
-  return existingStatus === "ignored" ? "ignored" : "already-known";
+  return existingStatus === "ignored" ||
+    existingStatus === "patch-draft-created"
+    ? existingStatus
+    : "already-known";
 }
