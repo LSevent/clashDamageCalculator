@@ -38,6 +38,15 @@ const patchDefinitions: readonly PatchInfo[] = patches;
 const buildingDefinitions: readonly BuildingDefinition[] = buildings;
 const equipmentDefinitions: readonly EquipmentDefinition[] = equipment;
 const spellDefinitions: readonly SpellDefinition[] = spells;
+const updateSources = [
+  {
+    id: "clash-official-news",
+    name: "Clash of Clans Official Blog",
+    url: "https://supercell.com/en/games/clashofclans/blog/",
+    sourceType: "official",
+    enabled: true,
+  },
+] as const;
 
 function jsonValue(value: unknown) {
   return value === undefined ? Prisma.JsonNull : (value as Prisma.InputJsonValue);
@@ -251,25 +260,44 @@ async function seedObjectIdMappings() {
   }
 }
 
+async function seedUpdateSources() {
+  for (const source of updateSources) {
+    await prisma.updateSource.upsert({
+      where: { id: source.id },
+      update: {
+        name: source.name,
+        url: source.url,
+        sourceType: source.sourceType,
+        enabled: source.enabled,
+      },
+      create: source,
+    });
+  }
+
+  return updateSources.length;
+}
+
 async function main() {
   await seedPatches();
   await seedBuildings();
   await seedEquipment();
   await seedSpells();
   await seedObjectIdMappings();
+  const updateSourceCount = await seedUpdateSources();
 
-  return getDatabaseSeedSummary({
-    patches: patchDefinitions,
-    buildings: buildingDefinitions,
-    equipment: equipmentDefinitions,
-    spells: spellDefinitions,
-    objectIdMap,
-  });
+  return {
+    ...getDatabaseSeedSummary({
+      patches: patchDefinitions,
+      buildings: buildingDefinitions,
+      equipment: equipmentDefinitions,
+      spells: spellDefinitions,
+      objectIdMap,
+    }),
+    updateSources: updateSourceCount,
+  };
 }
 
-function printSeedSummary(
-  summary: ReturnType<typeof getDatabaseSeedSummary>,
-) {
+function printSeedSummary(summary: Awaited<ReturnType<typeof main>>) {
   console.log("Database seed completed successfully.");
   console.log(`Patches upserted: ${summary.patches}`);
   console.log(`Buildings upserted: ${summary.buildings}`);
@@ -279,6 +307,7 @@ function printSeedSummary(
   console.log(`Spells upserted: ${summary.spells}`);
   console.log(`Spell levels upserted: ${summary.spellLevels}`);
   console.log(`Object mappings upserted: ${summary.objectMappings}`);
+  console.log(`Update sources upserted: ${summary.updateSources}`);
 }
 
 function getSafeErrorCode(error: unknown) {

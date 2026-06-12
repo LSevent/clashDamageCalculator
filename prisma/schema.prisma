@@ -162,3 +162,32 @@ model ObjectIdMapping {
 
   @@unique([category, dataId])
 }
+
+model UpdateSource {
+  id            String              @id
+  name          String
+  url           String
+  sourceType    String
+  enabled       Boolean             @default(true)
+  lastCheckedAt DateTime?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  results       UpdateCheckResult[]
+}
+
+model UpdateCheckResult {
+  id           String       @id @default(cuid())
+  sourceId     String
+  source       UpdateSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  title        String
+  url          String       @unique
+  publishedAt  DateTime?
+  detectedType String
+  status       String
+  checkedAt    DateTime     @default(now())
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([sourceId, status])
+  @@index([checkedAt])
+}

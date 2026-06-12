@@ -13,6 +13,7 @@ const adminNavigation = [
   { href: "/admin/data/equipment", label: "Equipment" },
   { href: "/admin/data/spells", label: "Spells" },
   { href: "/admin/data/import-export", label: "Import / Export" },
+  { href: "/admin/updates", label: "Update Checker" },
 ];
 
 type AdminLayoutProps = {

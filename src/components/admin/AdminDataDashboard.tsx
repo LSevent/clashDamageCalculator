@@ -39,6 +39,11 @@ const sections = [
     label: "Bulk import / export",
     description: "Preview curated CSV stat-table updates and export database rows.",
   },
+  {
+    href: "/admin/updates",
+    label: "Official update checker",
+    description: "Check configured official news sources for review-only post detections.",
+  },
 ];
 
 export function AdminDataDashboard({

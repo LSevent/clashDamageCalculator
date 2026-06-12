@@ -52,8 +52,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             Review and correct database-backed game data
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
-            Use these editors for small verified changes. Bulk import is
-            intentionally not included in this phase.
+            Use these editors for small verified changes, curated bulk stat
+            imports, and review-only checks of official public news.
           </p>
         </Card>
         <Card className="p-6">
@@ -64,6 +64,9 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             </Link>
             <Link className="text-sm font-bold text-emerald-300" href="/calculator">
               Open public Calculator
+            </Link>
+            <Link className="text-sm font-bold text-emerald-300" href="/admin/updates">
+              Check official updates
             </Link>
           </div>
         </Card>

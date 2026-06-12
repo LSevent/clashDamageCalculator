@@ -24,6 +24,7 @@ minimum number of Earthquakes needed for a selected setup.
 - Patch history, verification status, sources, and data coverage dashboard
 - PostgreSQL game data with automatic static fallback
 - Protected database admin editor for small manual corrections
+- Admin-only official update checker for review-only blog post detection
 - Responsive layouts for desktop and mobile
 
 ## Tech Stack
@@ -180,6 +181,26 @@ spellId,spellName,level,damage,damagePercent,repeatDamageRule,patchId,sourceUrl,
 earthquake-spell,Earthquake Spell,5,,0.29,diminishing-odd-denominator,may-2026,https://example.com,needs-review,Percentage damage
 ```
 
+## Official Update Checker
+
+The protected `/admin/updates` page lets an authenticated admin manually check
+configured official Clash of Clans public news sources.
+
+- Requires `DATABASE_URL`, seeded update-source records, and
+  `ADMIN_ACCESS_KEY`.
+- Checks only the allowlisted official Supercell Clash of Clans blog.
+- Runs on demand from the admin button; no scheduler is included.
+- Uses a five-minute cooldown per source and a short server-side timeout.
+- Saves detected post titles, official URLs, dates when available,
+  classifications, and review statuses.
+- Does not update calculator stats, create patches, or create stat rows.
+- Does not inspect the Clash of Clans app, packets, memory, emulators, or game
+  files.
+- Ignored results remain stored for review history.
+
+Phase 11B will allow creating patch drafts from reviewed detections. Phase 11C
+will add a separate suggested stat-change review workflow.
+
 ## Project Structure
 
 ```text
@@ -215,6 +236,7 @@ src/types/game/              Game, calculator, import, and progress types
 9.5. Database deployment diagnostics and production verification
 10. Protected admin data editor for manual database corrections
 10.5. Protected CSV import/export for database stat tables
+11A. Admin-only official update checker with saved review results
 
 ## Data Sources And Verification
 
@@ -243,7 +265,9 @@ claim that every in-game level is present.
   incomplete.
 - Calculator results depend on the accuracy of the active database or fallback
   data.
-- The app does not scrape, inspect, or extract data from Clash of Clans.
+- The app does not inspect or extract data from the Clash of Clans game, app,
+  packets, memory, emulators, or game files. The admin-only update checker reads
+  configured official public Supercell news pages for post detection only.
 
 ## Manual Progress Setup
 
@@ -312,11 +336,14 @@ save normalized progress.
 - JSON import does not query database object mappings yet.
 - The admin editor uses a single owner-managed access key rather than accounts
   or role-based authentication.
+- Official update classifications are keyword-based hints for admin review and
+  are not treated as verified stat data.
 - Official API import is not implemented.
 
 ## Roadmap
 
-- Phase 11: Add a controlled patch update workflow
+- Phase 11B: Create patch drafts from reviewed official post detections
+- Phase 11C: Add suggested stat-change extraction and review
 - Future: Consider official Clash API profile import where appropriate
 
 ## Disclaimer
